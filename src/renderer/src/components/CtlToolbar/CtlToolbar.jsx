@@ -1,28 +1,10 @@
-import { CheckIcon, DoorOpenIcon, ImagesIcon, ShapesIcon, TextIcon, TypeIcon } from 'lucide-react'
+import { CheckIcon, DoorOpenIcon } from 'lucide-react'
 import Button from '../Button'
 import Typography from '../Typography'
 
 import './CtlToolbar.css'
-import { useState } from 'react'
 
-function CtlToolbar() {
-  const [selectedTab, setSelectedTab] = useState(0)
-
-  const tabs = [
-    {
-      title: 'Texte',
-      icon: <TypeIcon size={28} strokeWidth={2.5} className="ts" />
-    },
-    {
-      title: 'Symboles',
-      icon: <ShapesIcon size={28} strokeWidth={2.5} className="ts" />
-    },
-    {
-      title: 'Arrière-plan',
-      icon: <ImagesIcon size={28} strokeWidth={2.5} className="ts" />
-    }
-  ]
-
+function CtlToolbar({ selectedTab, setSelectedTab, tabs }) {
   return (
     <div className="ctltoolbar flex gap-2 justify-between w-full px-10 py-6">
       <div className="flex gap-4 w-full">

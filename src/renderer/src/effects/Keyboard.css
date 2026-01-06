@@ -1,0 +1,80 @@
+.keyboard-wrapper {
+  position: fixed;
+  bottom: 0px;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  padding: 40px;
+  pointer-events: none;
+}
+
+.keyboard-container {
+  width: 100%;
+  max-width: 1000px;
+  pointer-events: auto;
+  box-shadow: 0 10px 50px rgba(0, 0, 0, 1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.ctl-keyboard.hg-theme-default {
+  background-color: transparent !important;
+  font-family: inherit;
+}
+
+.ctl-keyboard.hg-theme-default .hg-button {
+  background: rgba(255, 255, 255, 0.05) !important;
+  color: white !important;
+  border-bottom: none !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  border-radius: 12px !important;
+  height: 60px !important;
+  font-size: 1.5rem !important;
+  font-weight: 500 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all 0.1s ease !important;
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.2) !important;
+}
+
+.ctl-keyboard.hg-theme-default .hg-button:active {
+  background: rgba(255, 255, 255, 0.15) !important;
+  transform: translateY(2px) !important;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.2) !important;
+}
+
+.ctl-keyboard.hg-theme-default .hg-button.hg-standardBtn {
+  flex-grow: 1;
+}
+
+.ctl-keyboard.hg-theme-default .hg-button.hg-functionBtn {
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+.ctl-keyboard.hg-theme-default .hg-button.hg-button-space {
+  width: 400px !important;
+}
+
+.ctl-keyboard.hg-theme-default .hg-button.hg-button-enter {
+  background: var(--primary) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Override simple-keyboard default spacing */
+.hg-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.hg-row {
+  display: flex;
+  gap: 8px;
+}
+
+.hg-row:not(:last-child) {
+  margin-bottom: 0 !important;
+}

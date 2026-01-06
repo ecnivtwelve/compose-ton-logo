@@ -1,4 +1,8 @@
 function DevTools() {
+  const toggleFullscreen = () => {
+    window.electron.ipcRenderer.send('toggle-fullscreen')
+  }
+
   const handleDebug = () => {
     window.electron.ipcRenderer.send('open-devtools')
   }
@@ -37,6 +41,9 @@ function DevTools() {
       </style>
 
       <div className="dev-tools">
+        <button onClick={toggleFullscreen}>
+          Toggle fullscreen
+        </button>
         <button onClick={handleDebug}>
           Debug
         </button>

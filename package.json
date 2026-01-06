@@ -23,6 +23,10 @@
     "@electron-toolkit/utils": "^4.0.0",
     "@tailwindcss/vite": "^4.1.18",
     "lucide-react": "^0.562.0",
+    "motion": "^12.24.7",
+    "react-simple-keyboard": "^3.8.141",
+    "simple-keyboard": "^3.8.93",
+    "simple-keyboard-layouts": "^3.4.147",
     "tailwindcss": "^4.1.18"
   },
   "devDependencies": {

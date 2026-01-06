@@ -5,13 +5,17 @@ import { createRoot } from 'react-dom/client'
 import App from './App'
 import ClickEffect from './effects/ClickEffect'
 import DevTools from './effects/DevTools'
+import Keyboard from './effects/Keyboard'
+
+import ScaleContainer from './components/ScaleContainer'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <div id="app">
+    <ScaleContainer>
       <App />
       <ClickEffect />
       <DevTools />
-    </div>
+      <Keyboard />
+    </ScaleContainer>
   </StrictMode>
 )

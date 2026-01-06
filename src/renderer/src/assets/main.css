@@ -27,19 +27,27 @@ body {
 }
 
 #app {
-  position: relative;
-  aspect-ratio: 16/9;
-  width: 100vw;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 1920px;
+  height: 1080px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   overflow: hidden !important;
   background: var(--ctl-gradient);
+  transform-origin: center center;
+  transform: translate(-50%, -50%) scale(1);
 }
 
 img {
   pointer-events: none;
+}
+
+input:focus {
+  outline: none !important;
 }
 
 .ts {
@@ -49,9 +57,14 @@ img {
 
 .ctl-pressable {
   --tint: transparent;
-  border-radius: 12px;
   border: 2px solid rgba(26, 29, 45, 0.32);
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.00) 70%, rgba(255, 255, 255, 0.30) 100%), linear-gradient(180deg, rgba(0, 0, 0, 0.00) 20%, rgba(0, 0, 0, 0.30) 80%), linear-gradient(0deg, var(--tint) 0%, var(--tint) 100%), rgba(0, 0, 0, 0.12);
+  box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.5);
+}
+
+.ctl-bw {
+  border: 2px solid rgba(255, 255, 255, 0.22);
+
 }
 
 .ctl-button {
@@ -64,7 +77,6 @@ img {
   grid-row: 1 / span 1;
   grid-column: 1 / span 1;
   justify-self: stretch;
-  box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.5);
   transition: all 0.3s ease-in;
 }
 
@@ -72,4 +84,10 @@ img {
   filter: brightness(1.4);
   transition: all 0s ease-out, transform 0.05s ease-out;
   transform: scale(1.05);
+}
+
+.panel {
+  border-radius: 20px;
+  border: 1px solid rgba(0, 0, 0, 0.30);
+  background: rgba(0, 0, 0, 0.50);
 }

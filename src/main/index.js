@@ -58,6 +58,11 @@ app.whenReady().then(() => {
     webContents.openDevTools()
   })
 
+  ipcMain.on('toggle-fullscreen', (event) => {
+    const mainWindow = BrowserWindow.getFocusedWindow()
+    mainWindow.setFullScreen(!mainWindow.isFullScreen())
+  })
+
   ipcMain.on('quit-app', () => {
     app.quit()
   })

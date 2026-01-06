@@ -1,16 +1,17 @@
+import popSound from '../assets/sounds/pop.mp3'
+
 const Button = ({ children, tint, onClick, ...extraProps }) => {
   const playButtonSound = () => {
-    const buttonSound = new Audio('/sounds/pop.mp3')
+    const buttonSound = new Audio(popSound)
     buttonSound.play()
   }
 
   const handlePress = () => {
     onClick && onClick()
-    playButtonSound()
   }
 
   return (
-    <div {...extraProps} className="ctl-pressable ctl-button" style={{ '--tint': tint }} onClick={handlePress}>
+    <div {...extraProps} className="ctl-pressable ctl-button" style={{ '--tint': tint }} onClick={handlePress} onPointerUp={playButtonSound}>
       {children}
     </div>
   )

@@ -1,26 +1,27 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 
 const ClickEffect = () => {
   const [clicks, setClicks] = useState([]);
 
   useEffect(() => {
     const handleClick = (e) => {
+      const app = document.getElementById('app');
+      if (!app) return;
+
+      const rect = app.getBoundingClientRect();
+      const scale = rect.width / 1920;
+
       const newClick = {
         id: Date.now(),
-        x: e.clientX,
-        y: e.clientY,
+        x: (e.clientX - rect.left) / scale,
+        y: (e.clientY - rect.top) / scale,
       };
 
-      // Add the new click to state
       setClicks((prevClicks) => [...prevClicks, newClick]);
     };
 
     document.addEventListener('click', handleClick);
-
-    // Cleanup listener on unmount
-    return () => {
-      document.removeEventListener('click', handleClick);
-    };
+    return () => document.removeEventListener('click', handleClick);
   }, []);
 
   const handleAnimationEnd = (id) => {
