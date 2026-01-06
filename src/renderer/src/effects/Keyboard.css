@@ -63,6 +63,13 @@
   border-color: rgba(255, 255, 255, 0.2) !important;
 }
 
+.ctl-keyboard.hg-theme-default .hg-button.hg-active-lock,
+.ctl-keyboard.hg-theme-default .hg-button.hg-active-shift {
+  background: rgba(255, 255, 255, 0.3) !important;
+  border-color: white !important;
+  color: white !important;
+}
+
 /* Override simple-keyboard default spacing */
 .hg-rows {
   display: flex;

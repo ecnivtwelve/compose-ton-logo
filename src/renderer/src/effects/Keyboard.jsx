@@ -11,6 +11,7 @@ import layout from 'simple-keyboard-layouts/build/layouts/french'
 const KeyboardEffect = () => {
   const [isVisible, setIsVisible] = useState(false)
   const [layoutName, setLayoutName] = useState('default')
+  const [isCapsLock, setIsCapsLock] = useState(false)
   const activeInputRef = useRef(null)
   const keyboardRef = useRef()
 
@@ -75,14 +76,26 @@ const KeyboardEffect = () => {
 
   const onKeyPress = (button) => {
     playKeySound()
-    if (button === '{shift}' || button === '{lock}') {
+    if (button === '{shift}') {
       setLayoutName(layoutName === 'default' ? 'shift' : 'default')
-    }
-    if (button === '{enter}') {
+    } else if (button === '{lock}') {
+      const newLock = !isCapsLock
+      setIsCapsLock(newLock)
+      setLayoutName(newLock ? 'shift' : 'default')
+    } else if (button === '{enter}') {
       if (activeInputRef.current) {
         activeInputRef.current.blur()
       }
       setIsVisible(false)
+    } else {
+      // Handle temporary shift/uncapitalize
+      if (!button.startsWith('{')) {
+        if (isCapsLock) {
+          setLayoutName('shift')
+        } else {
+          setLayoutName('default')
+        }
+      }
     }
   }
 
@@ -111,6 +124,7 @@ const KeyboardEffect = () => {
                   }
                 }}
                 layout={layout.layout}
+                layoutName={layoutName}
                 onChange={onChange}
                 onKeyPress={onKeyPress}
                 display={{
@@ -121,6 +135,16 @@ const KeyboardEffect = () => {
                   '{lock}': 'Maj.',
                   '{space}': 'Espace'
                 }}
+                buttonTheme={[
+                  {
+                    class: 'hg-active-lock',
+                    buttons: isCapsLock ? '{lock}' : ''
+                  },
+                  {
+                    class: 'hg-active-shift',
+                    buttons: layoutName === 'shift' && !isCapsLock ? '{shift}' : ''
+                  }
+                ]}
                 theme={'hg-theme-default hg-layout-default ctl-keyboard'}
               />
             </div>
