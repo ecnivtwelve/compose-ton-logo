@@ -75,16 +75,18 @@ function LayersEditor({ document, setDocument, layer, setLayer, tab, setTab }) {
             ))}
           </Reorder.Group>
 
-          <Button
-            key={document.length}
-            className="ctl-pressable ctl-button w-full h-13 min-h-13"
-            onClick={createNewLayer}
-          >
-            <PlusIcon className="ts" size={28} strokeWidth={2.5} />
-            <p className="ts text-left w-full font-semibold text-lg">
-              Nouveau {tab === 'text' ? 'texte' : tab === 'symbols' ? 'symbole' : 'arrière-plan'}
-            </p>
-          </Button>
+          {tab !== 'background' && (
+            <Button
+              key={document.length}
+              className="ctl-pressable ctl-button w-full h-13 min-h-13"
+              onClick={createNewLayer}
+            >
+              <PlusIcon className="ts" size={28} strokeWidth={2.5} />
+              <p className="ts text-left w-full font-semibold text-lg">
+                Nouveau {tab === 'text' ? 'texte' : tab === 'symbols' ? 'symbole' : 'fond'}
+              </p>
+            </Button>
+          )}
         </div>
       </div>
     </>
@@ -123,7 +125,11 @@ function LayerItem({ item, i, layer, setLayer, setTab, deleteLayer, documentLeng
       >
         {tabs.find((tab) => tab.key == item.type).icon}
         <p className="ts text-left w-full font-semibold text-lg">
-          {item.type === 'text' && item.content.trim() ? item.content.trim() : 'Calque ' + (i + 1)}
+          {item.type === 'background'
+            ? 'Arrière-plan'
+            : item.type === 'text' && item.content.trim().length > 0
+              ? item.content.trim()
+              : 'Calque ' + (i + 1)}
         </p>
       </Button>
 

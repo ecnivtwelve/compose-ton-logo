@@ -8,24 +8,45 @@ function ContentPreview({ document }) {
   console.log(document)
   const playerRef = useRef(null)
   const isFirstRender = useRef(true)
+  const prevFingerprintRef = useRef('')
+
   const bigThingsFingerprint = JSON.stringify(
-    document.map((l) => ({ font: l.font, symbolName: l.symbol?.name }))
+    document.map((l) => ({ id: l.id, font: l.font, symbolName: l.symbol?.name }))
   )
 
   useEffect(() => {
     if (isFirstRender.current) {
       isFirstRender.current = false
+      prevFingerprintRef.current = bigThingsFingerprint
       return
     }
 
-    if (playerRef.current) {
-      playerRef.current.stop()
-      playerRef.current.play()
+    const prevFingerprint = JSON.parse(prevFingerprintRef.current || '[]')
+    const currentFingerprint = JSON.parse(bigThingsFingerprint)
+
+    const hasFontOrSymbolChanged = currentFingerprint.some((curr) => {
+      const prev = prevFingerprint.find((p) => p.id === curr.id)
+      if (!prev) return false
+      return curr.font !== prev.font || curr.symbolName !== prev.symbolName
+    })
+
+    if (hasFontOrSymbolChanged) {
+      if (playerRef.current) {
+        playerRef.current.stop()
+        playerRef.current.play()
+      }
     }
-  }, [document.length, bigThingsFingerprint])
+
+    prevFingerprintRef.current = bigThingsFingerprint
+  }, [bigThingsFingerprint])
   return (
     <>
-      <div className="w-full h-full flex items-center justify-center overflow-hidden position-relative">
+      <div
+        className="w-full h-full flex items-center justify-center overflow-hidden position-relative"
+        style={{
+          pointerEvents: 'none'
+        }}
+      >
         <Player
           ref={playerRef}
           autoplay={false}

@@ -27,4 +27,9 @@ export const symbolDefaultState = {
   border: 0
 }
 
-export const defaultState = [textDefaultState]
+export const backgroundDefaultState = {
+  type: 'background',
+  color: '#000000'
+}
+
+export const defaultState = [backgroundDefaultState, textDefaultState]

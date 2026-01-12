@@ -4,7 +4,7 @@ import ContentEditor from './editors/ContentEditor'
 import ContentPreview from './editors/ContentPreview'
 import { useState } from 'react'
 import { ImagesIcon, ShapesIcon, TypeIcon } from 'lucide-react'
-import { defaultState } from './utils/consts'
+import { defaultState, symbolDefaultState, textDefaultState } from './utils/consts'
 import Alert from './effects/Alert'
 import { ErrorBoundary } from 'react-error-boundary'
 
@@ -81,6 +81,30 @@ function App() {
       <CtlToolbar
         selectedTab={tab}
         setSelectedTab={(type) => {
+          if (type === 'background') {
+            setTab(type)
+            return
+          }
+
+          const availableLayers = document
+            .map((l, i) => ({ ...l, index: i }))
+            .filter((l) => l.type === type)
+
+          if (availableLayers.length === 0) {
+            const newLayer = {
+              ...(type === 'text' ? textDefaultState : symbolDefaultState),
+              id: Math.random().toString(36).substr(2, 9)
+            }
+            const newDocument = [...document, newLayer]
+            setDocument(newDocument)
+            setLayer(newDocument.length - 1)
+          } else {
+            const nearest = availableLayers.reduce((prev, curr) => {
+              return Math.abs(curr.index - layer) < Math.abs(prev.index - layer) ? curr : prev
+            })
+            setLayer(nearest.index)
+          }
+
           setTab(type)
         }}
         tabs={tabs}
