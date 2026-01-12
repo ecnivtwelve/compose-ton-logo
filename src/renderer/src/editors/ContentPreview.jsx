@@ -4,8 +4,12 @@ import { Player } from '@lottiefiles/react-lottie-player'
 import sparksLottie from '../assets/lottie/sparks.json'
 import { motion, AnimatePresence } from 'motion/react'
 
+const allPatterns = import.meta.glob('../assets/img/patterns/*.png', {
+  eager: true,
+  query: '?url'
+})
+
 function ContentPreview({ document }) {
-  console.log(document)
   const playerRef = useRef(null)
   const isFirstRender = useRef(true)
   const prevFingerprintRef = useRef('')
@@ -63,6 +67,7 @@ function ContentPreview({ document }) {
 }
 
 function ContentRenderer({ document }) {
+  console.log(document)
   return (
     <>
       <div
@@ -70,7 +75,7 @@ function ContentRenderer({ document }) {
         style={{
           // mask all borders
           maskImage:
-            'linear-gradient(0deg, rgba(255, 255, 255, 0.00) 0%, #FFF 20%, #FFF 80.29%, rgba(255, 255, 255, 0.00) 100%)'
+            'linear-gradient(0deg, rgba(255, 255, 255, 0.00) 0%, #FFF 10%, #FFF 90%, rgba(255, 255, 255, 0.00) 100%)'
         }}
       >
         <div
@@ -78,7 +83,7 @@ function ContentRenderer({ document }) {
           style={{
             // mask all borders
             maskImage:
-              'linear-gradient(270deg, rgba(255, 255, 255, 0.00) 0%, #FFF 20%, #FFF 80.29%, rgba(255, 255, 255, 0.00) 100%)'
+              'linear-gradient(270deg, rgba(255, 255, 255, 0.00) 0%, #FFF 10%, #FFF 90%, rgba(255, 255, 255, 0.00) 100%)'
           }}
         >
           {document.map((layer) => {
@@ -151,6 +156,28 @@ function ContentRenderer({ document }) {
                         />
                       </motion.div>
                     </AnimatePresence>
+                  </div>
+                </React.Fragment>
+              )
+            } else if (layer.type == 'background') {
+              const pattern = allPatterns[layer.pattern]
+
+              return (
+                <React.Fragment key={layer.id}>
+                  <div
+                    style={{
+                      borderRadius: layer.radius,
+                      width: layer.size,
+                      height: layer.size,
+                      backgroundColor: layer.color,
+                      position: 'absolute',
+                      visibility: layer.enabled ? 'visible' : 'hidden',
+                      overflow: 'hidden'
+                    }}
+                  >
+                    {layer.pattern && <img src={pattern.default} style={{
+                      opacity: layer.patternOpacity / 100
+                    }} />}
                   </div>
                 </React.Fragment>
               )

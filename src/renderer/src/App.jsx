@@ -32,7 +32,7 @@ function App() {
   )
   const [tab, setTab] = useState('text')
 
-  const [layer, setLayer] = useState(0)
+  const [layer, setLayer] = useState(1)
 
   const [resetConfirmVisible, setResetConfirmVisible] = useState(false)
 
@@ -59,7 +59,7 @@ function App() {
           setDocument(
             defaultState.map((s) => ({ ...s, id: Math.random().toString(36).substr(2, 9) }))
           )
-          setLayer(0)
+          setLayer(1)
           setResetConfirmVisible(false)
         }}
         confirmText="Recommencer"
@@ -83,6 +83,10 @@ function App() {
         setSelectedTab={(type) => {
           if (type === 'background') {
             setTab(type)
+            const bgIndex = document.findIndex((l) => l.type === 'background')
+            if (bgIndex !== -1) {
+              setLayer(bgIndex)
+            }
             return
           }
 

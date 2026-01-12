@@ -104,28 +104,28 @@
   font-family: 'Aleo';
   src: url('/fonts/Aleo-Bold.ttf');
   font-weight: 700;
-  font-style: italic;
+  font-style: normal;
 }
 
 @font-face {
   font-family: 'LeckerliOne';
   src: url('/fonts/LeckerliOne-Regular.ttf');
   font-weight: 400;
-  font-style: italic;
+  font-style: normal;
 }
 
 @font-face {
   font-family: 'Limelight';
   src: url('/fonts/Limelight-Regular.ttf');
   font-weight: 400;
-  font-style: italic;
+  font-style: normal;
 }
 
 @font-face {
   font-family: 'Audiowide';
   src: url('/fonts/Audiowide-Regular.ttf');
   font-weight: 400;
-  font-style: italic;
+  font-style: normal;
 }
 
 @font-face {
@@ -139,5 +139,54 @@
   font-family: 'Ribeye';
   src: url('/fonts/Ribeye-Regular.ttf');
   font-weight: 400;
-  font-style: italic;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Archivo';
+  src: url('/fonts/Archivo-Medium.ttf');
+  font-weight: 500;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'MetalMania';
+  src: url('/fonts/MetalMania-Regular.ttf');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Micro5';
+  src: url('/fonts/Micro5-Regular.ttf');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'UniRennes';
+  src: url('/fonts/UniRennes-Inline.otf');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'AuBordDeLaSeine';
+  src: url('/fonts/AuBordDeLaSeine.ttf');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Bright';
+  src: url('/fonts/Bright.otf');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'ChocolateAdventure';
+  src: url('/fonts/ChocolateAdventure.ttf');
+  font-weight: 400;
+  font-style: normal;
 }

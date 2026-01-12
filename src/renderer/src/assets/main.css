@@ -81,6 +81,10 @@ input:focus {
   outline: 4px solid #fff;
 }
 
+.ctl-nopadding {
+  padding: 0;
+}
+
 .ctl-button:active {
   filter: brightness(1.4);
   transition: all 0s ease-out, transform 0.05s ease-out;

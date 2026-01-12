@@ -29,7 +29,11 @@ export const symbolDefaultState = {
 
 export const backgroundDefaultState = {
   type: 'background',
-  color: '#000000'
+  enabled: false,
+  patternOpacity: 100,
+  color: '#000000',
+  size: 500,
+  radius: 20
 }
 
 export const defaultState = [backgroundDefaultState, textDefaultState]

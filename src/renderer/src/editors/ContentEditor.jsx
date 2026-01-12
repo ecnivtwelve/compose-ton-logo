@@ -1,12 +1,17 @@
-import { SearchIcon, TypeIcon, XIcon } from 'lucide-react'
+import { CheckIcon, MinusIcon, SearchIcon, TypeIcon, XIcon } from 'lucide-react'
 import { motion, AnimatePresence } from 'motion/react'
 import { useEffect, useState, useRef } from 'react'
+
+const allPatterns = import.meta.glob('../assets/img/patterns/*.png', {
+  eager: true,
+  query: '?url'
+})
 
 import popSound from '../assets/sounds/pop.mp3'
 import hitSound from '../assets/sounds/hit.mp3'
 import scrollSound from '../assets/sounds/scroll_2.ogg'
 import alertSound from '../assets/sounds/alert.ogg'
-import { symbolDefaultState, textDefaultState } from '../utils/consts'
+import { backgroundDefaultState, symbolDefaultState, textDefaultState } from '../utils/consts'
 import Alert from '../effects/Alert'
 
 import frenchBadwords from 'french-badwords-list'
@@ -22,7 +27,7 @@ function ContentEditor({ document, setDocument, layer, tab }) {
     if (scrollRef.current) {
       setTimeout(() => {
         scrollRef.current.scrollTo(0, 0)
-      }, 200);
+      }, 200)
     }
   }, [content?.type, tab])
 
@@ -69,6 +74,10 @@ function ContentEditor({ document, setDocument, layer, tab }) {
 
             {content.type == 'symbols' && (
               <SymbolEditor tab={document[layer].type} content={content} setLayer={setLayer} />
+            )}
+
+            {content.type == 'background' && (
+              <BackgroundEditor tab={document[layer].type} content={content} setLayer={setLayer} />
             )}
           </motion.div>
         </AnimatePresence>
@@ -323,7 +332,7 @@ function SymbolEditor({ content, setLayer }) {
       <div className="flex flex-col gap-2">
         <p className="ts text-2xl font-semibold">Couleurs</p>
         <p className="ts text-lg font-regular opacity-70">
-          La couleur de votre texte sera utile pour lui donner un caractère. Vous pourrez changer ce
+          La couleur de votre forme sera utile pour lui donner un caractère. Vous pourrez changer ce
           paramètre ultérieurement.
         </p>
       </div>
@@ -415,6 +424,144 @@ function SymbolEditor({ content, setLayer }) {
   )
 }
 
+function BackgroundEditor({ content, setLayer }) {
+  const setLayerBg = (layer) => {
+    if (!content.enabled) {
+      setLayer({ ...layer, enabled: true })
+    } else {
+      setLayer(layer)
+    }
+  }
+
+  return (
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-2">
+        <p className="ts text-3xl font-semibold">Choisissez un arrière plan</p>
+        <p className="ts text-lg font-regular opacity-70">
+          Le bon arrière-plan peut aider votre design à se démarquer encore plus. Cependant, il faut
+          réfléchir à un contraste marqué, une bonne combinaison de couleur et à l’adaptabilité.
+        </p>
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <div className="flex flex-row gap-4 items-center">
+          <Checkbox
+            checked={content.enabled}
+            onChange={(enabled) => setLayer({ ...content, enabled })}
+          />
+          <p className="ts text-xl font-semibold w-full">Afficher</p>
+        </div>
+      </div>
+
+      <div className="h-1" />
+
+      <div className="flex flex-col gap-2">
+        <p className="ts text-2xl font-semibold">Couleurs</p>
+        <p className="ts text-lg font-regular opacity-70">
+          La couleur de votre fond sera utile pour lui donner un caractère. Vous pourrez changer ce
+          paramètre ultérieurement.
+        </p>
+      </div>
+
+      <ColorSelector
+        currentColor={content.color}
+        onColorSelect={(color) => setLayerBg({ ...content, color: color })}
+      />
+
+      <div className="h-1" />
+
+      <div className="flex flex-col gap-2">
+        <p className="ts text-2xl font-semibold">Motif</p>
+        <p className="ts text-lg font-regular opacity-70">
+          Un motif peut être utilisé pour aider à pour apporter plus de contexte au logo d’une
+          marque. Les motifs peuvent également offrir un contraste par rapport à un logo plat.
+        </p>
+      </div>
+
+      <PatternSelector
+        selectedPattern={content.pattern}
+        setSelectedPattern={(pattern) => setLayerBg({ ...content, pattern: pattern })}
+      />
+
+      <div className="flex flex-col gap-2">
+        <div className="flex flex-row gap-3 items-center">
+          <p className="ts text-xl font-semibold w-56">Opacité du motif</p>
+          <Slider
+            value={content.patternOpacity ?? 100}
+            range={[0, 100]}
+            unit={'%'}
+            defaultValue={backgroundDefaultState.patternOpacity}
+            onChange={(patternOpacity) => setLayerBg({ ...content, patternOpacity })}
+          />
+        </div>
+      </div>
+
+      <div className="h-1" />
+
+      <div className="flex flex-col gap-2">
+        <p className="ts text-2xl font-semibold">Réglages avancés</p>
+        <p className="ts text-lg font-regular opacity-70">
+          Ajoutez des options à votre texte pour en améliorer l’apparence
+        </p>
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <div className="flex flex-row gap-3 items-center">
+          <p className="ts text-xl font-semibold w-56">Taille du fond</p>
+          <Slider
+            value={content.size ?? 500}
+            range={[300, 700]}
+            unit={'px'}
+            defaultValue={backgroundDefaultState.size}
+            onChange={(size) => setLayerBg({ ...content, size })}
+          />
+        </div>
+        <div className="flex flex-row gap-3 items-center">
+          <p className="ts text-xl font-semibold w-56">Bords arrondis</p>
+          <Slider
+            value={content.radius ?? 20}
+            range={[0, content.size / 2]}
+            unit={'px'}
+            defaultValue={backgroundDefaultState.radius}
+            onChange={(radius) => setLayerBg({ ...content, radius })}
+          />
+        </div>
+      </div>
+
+      <div className="h-10" />
+    </div>
+  )
+}
+
+function PatternSelector({ selectedPattern, setSelectedPattern }) {
+  const patterns = Object.entries(allPatterns)
+
+  return (
+    <div className="grid gap-2 grid-cols-6 w-full">
+      {patterns.map(([url, module]) => (
+        <div
+          className={`ctl-pressable ctl-button ctl-nopadding p-2 h-18 rounded-2xl flex flex-column items-center justify-center overflow-hidden relative ${selectedPattern === url ? 'ctl-selected' : ''}`}
+          key={url}
+          onClick={() => {
+            const selectPatternSound = new Audio(hitSound)
+            selectPatternSound.play()
+
+            if (selectedPattern === url) {
+              setSelectedPattern(null)
+            } else {
+              setSelectedPattern(url)
+            }
+          }}
+        >
+          <div className="w-full h-full absolute ctl-pressable z-200" />
+
+          <img src={module.default} alt="" className="w-full h-full object-cover absolute" />
+        </div>
+      ))}
+    </div>
+  )
+}
+
 function SymbolSelector({ selectedSymbol, setSelectedSymbol }) {
   const [selectedCategory, setSelectedCategory] = useState('Toutes')
   const [searchTerms, setSearchTerms] = useState('')
@@ -462,7 +609,7 @@ function SymbolSelector({ selectedSymbol, setSelectedSymbol }) {
         </select>
       </div>
 
-      <div className="flex flex-col ctl-container py-3 px-3 h-66 rounded-2xl overflow-scroll">
+      <div className="flex flex-col ctl-container py-3 px-3 h-56 rounded-2xl overflow-scroll">
         <div className="grid gap-3 grid-cols-5 w-full">
           {filteredSymbols.map((symbol, i) => {
             const Icon = symbol.svg
@@ -478,7 +625,7 @@ function SymbolSelector({ selectedSymbol, setSelectedSymbol }) {
                   backgroundColor: selectedSymbol === symbol ? '#ffffff44' : '#ffffff00'
                 }}
               >
-                <Icon fill={'white'} />
+                <Icon fill={'white'} width={40} height={40} />
               </div>
             )
           })}
@@ -488,7 +635,7 @@ function SymbolSelector({ selectedSymbol, setSelectedSymbol }) {
   )
 }
 
-function FontSelector({ text = 'Police', currentFont, onFontSelect }) {
+function FontSelector({ text = 'Texte', currentFont, onFontSelect }) {
   const fonts = [
     'Impact',
     'Comic Sans MS',
@@ -498,7 +645,14 @@ function FontSelector({ text = 'Police', currentFont, onFontSelect }) {
     'LeckerliOne',
     'Audiowide',
     'FasterOne',
-    'Ribeye'
+    'Ribeye',
+    'Archivo',
+    'MetalMania',
+    'Micro5',
+    'UniRennes',
+    'AuBordDeLaSeine',
+    'Bright',
+    'ChocolateAdventure'
   ]
 
   const playButtonSound = () => {
@@ -507,7 +661,7 @@ function FontSelector({ text = 'Police', currentFont, onFontSelect }) {
   }
 
   return (
-    <div className="grid gap-4 grid-cols-3 w-full">
+    <div className="grid gap-4 grid-cols-4 w-full">
       {fonts.map((font, i) => (
         <div
           key={i}
@@ -626,6 +780,28 @@ function Slider({ value, onChange, range, unit, defaultValue }) {
         <span className="ts text-2xl font-bold">{value}</span>
         <span className="ts text-sm font-medium opacity-60 ml-1 mt-1">{unit}</span>
       </div>
+    </div>
+  )
+}
+
+function Checkbox({ checked, onChange }) {
+  return (
+    <div
+      className="ctl-pressable ctl-button w-16 h-12 p-0 rounded-4xl flex items-center justify-center"
+      style={{
+        '--tint': checked ? 'var(--primary)' : 'var(--secondary)'
+      }}
+      onClick={() => {
+        const checkedSound = new Audio(popSound)
+        checkedSound.play()
+        onChange(!checked)
+      }}
+    >
+      {checked ? (
+        <CheckIcon color="#FFFFFF" size={30} strokeWidth={3} />
+      ) : (
+        <MinusIcon color="#FFFFFF" size={30} strokeWidth={3} />
+      )}
     </div>
   )
 }
