@@ -27,14 +27,21 @@ function ContentEditor({ document, setDocument, layer, tab }) {
   useEffect(() => {
     if (scrollRef.current) {
       const isTabChanging = prevTabRef.current !== tab
-      setTimeout(
-        () => {
-          if (scrollRef.current) {
-            scrollRef.current.scrollTo({ top: 0, behavior: isTabChanging ? 'auto' : 'smooth' })
-          }
-        },
-        isTabChanging ? 200 : 0
-      )
+      const isContentNotEmpty =
+        (content?.type === 'text' && content?.content?.trim().length > 0) ||
+        (content?.type === 'symbols' && content?.symbol) ||
+        content?.type === 'background'
+
+      if (isTabChanging || !isContentNotEmpty) {
+        setTimeout(
+          () => {
+            if (scrollRef.current) {
+              scrollRef.current.scrollTo({ top: 0, behavior: isTabChanging ? 'auto' : 'smooth' })
+            }
+          },
+          isTabChanging ? 200 : 0
+        )
+      }
     }
     prevTabRef.current = tab
   }, [content?.id, tab])
