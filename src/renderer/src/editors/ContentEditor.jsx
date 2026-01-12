@@ -23,13 +23,21 @@ function ContentEditor({ document, setDocument, layer, tab }) {
   const content = document[layer]
   const scrollRef = useRef(null)
 
+  const prevTabRef = useRef(tab)
   useEffect(() => {
     if (scrollRef.current) {
-      setTimeout(() => {
-        scrollRef.current.scrollTo(0, 0)
-      }, 200)
+      const isTabChanging = prevTabRef.current !== tab
+      setTimeout(
+        () => {
+          if (scrollRef.current) {
+            scrollRef.current.scrollTo({ top: 0, behavior: isTabChanging ? 'auto' : 'smooth' })
+          }
+        },
+        isTabChanging ? 200 : 0
+      )
     }
-  }, [content?.type, tab])
+    prevTabRef.current = tab
+  }, [content?.id, tab])
 
   if (!content) {
     return <div className="panel w-full h-full overflow-scroll relative" />

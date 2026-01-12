@@ -1,4 +1,4 @@
-import { FrameIcon, PlusIcon, XIcon, GripVertical } from 'lucide-react'
+import { PlusIcon, XIcon, GripVertical } from 'lucide-react'
 import logo from '../assets/img/logo.png'
 import { symbolDefaultState, textDefaultState } from '../utils/consts'
 import { tabs } from '../App'
@@ -9,12 +9,14 @@ import { useRef, useEffect } from 'react'
 
 function LayersEditor({ document, setDocument, layer, setLayer, tab, setTab }) {
   const scrollRef = useRef(null)
-
+  const prevTabRef = useRef(tab)
   useEffect(() => {
     if (scrollRef.current) {
-      scrollRef.current.scrollTo(0, 0)
+      const isTabChanging = prevTabRef.current !== tab
+      scrollRef.current.scrollTo({ top: 0, behavior: isTabChanging ? 'auto' : 'smooth' })
     }
-  }, [tab])
+    prevTabRef.current = tab
+  }, [tab, document.length])
 
   const handleReorder = (newOthers) => {
     const background = document.find((item) => item.type === 'background')
