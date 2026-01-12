@@ -21,6 +21,7 @@
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.2",
     "@electron-toolkit/utils": "^4.0.0",
+    "@lottiefiles/react-lottie-player": "^3.6.0",
     "@tailwindcss/vite": "^4.1.18",
     "badwords-list": "^2.0.1-4",
     "french-badwords-list": "^1.0.7",

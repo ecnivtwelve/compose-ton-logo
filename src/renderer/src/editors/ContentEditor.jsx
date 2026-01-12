@@ -14,8 +14,17 @@ import { array as badwords } from 'badwords-list'
 import { symbols } from '../utils/symbols'
 const allBadwords = [...frenchBadwords.array, ...badwords]
 
-function ContentEditor({ document, setDocument, layer }) {
+function ContentEditor({ document, setDocument, layer, tab }) {
   const content = document[layer]
+  const scrollRef = useRef(null)
+
+  useEffect(() => {
+    if (scrollRef.current) {
+      setTimeout(() => {
+        scrollRef.current.scrollTo(0, 0)
+      }, 200);
+    }
+  }, [content?.type, tab])
 
   if (!content) {
     return <div className="panel w-full h-full overflow-scroll relative" />
@@ -31,7 +40,7 @@ function ContentEditor({ document, setDocument, layer }) {
 
   return (
     <>
-      <div className="panel w-full h-full overflow-scroll relative">
+      <div ref={scrollRef} className="panel w-full h-full overflow-scroll relative">
         <AnimatePresence mode="wait">
           <motion.div
             key={document[layer].type}
@@ -420,6 +429,13 @@ function SymbolSelector({ selectedSymbol, setSelectedSymbol }) {
     symbol.tags.toLowerCase().includes(searchTerms.toLowerCase())
   )
 
+  const selectSymbol = (symbol) => {
+    const symbS = new Audio(hitSound)
+    symbS.play()
+
+    setSelectedSymbol(symbol)
+  }
+
   return (
     <div className="flex flex-col gap-4">
       <div className="ctl-pressable ctl-bw px-6 rounded-2xl flex items-center gap-4">
@@ -455,7 +471,7 @@ function SymbolSelector({ selectedSymbol, setSelectedSymbol }) {
               <div
                 className="p-2 h-18 rounded-2xl flex flex-column items-center justify-center"
                 key={i}
-                onClick={() => setSelectedSymbol(symbol)}
+                onClick={() => selectSymbol(symbol)}
                 style={{
                   borderColor: selectedSymbol === symbol ? '#fff' : 'transparent',
                   borderWidth: 2,

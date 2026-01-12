@@ -27,7 +27,9 @@ export const tabs = [
 ]
 
 function App() {
-  const [document, setDocument] = useState(defaultState)
+  const [document, setDocument] = useState(() =>
+    defaultState.map((s) => ({ ...s, id: Math.random().toString(36).substr(2, 9) }))
+  )
   const [tab, setTab] = useState('text')
 
   const [layer, setLayer] = useState(0)
@@ -54,7 +56,9 @@ function App() {
         title="Recommencer à zéro ?"
         message="Voulez-vous vraiment recommencer à partir du début ?"
         onConfirm={() => {
-          setDocument(defaultState)
+          setDocument(
+            defaultState.map((s) => ({ ...s, id: Math.random().toString(36).substr(2, 9) }))
+          )
           setLayer(0)
           setResetConfirmVisible(false)
         }}
@@ -71,7 +75,7 @@ function App() {
           tab={tab}
           setTab={setTab}
         />
-        <ContentEditor document={document} setDocument={setDocument} layer={layer} />
+        <ContentEditor document={document} setDocument={setDocument} layer={layer} tab={tab} />
         <ContentPreview document={document} />
       </div>
       <CtlToolbar
