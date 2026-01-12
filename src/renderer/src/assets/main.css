@@ -3,7 +3,6 @@
 
 * {
   user-select: none;
-  cursor: default !important;
 }
 
 body {
@@ -17,6 +16,7 @@ body {
   overflow: hidden;
   height: 100vh;
   width: 100vw;
+  cursor: default;
 }
 
 :root {
@@ -130,7 +130,6 @@ input[type="range"]::-moz-range-thumb {
   transition: all 0.2s ease;
 }
 
-.select {}
 
 .select:focus {
   outline: none !important;

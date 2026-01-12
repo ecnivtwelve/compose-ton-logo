@@ -53,7 +53,7 @@ function LayersEditor({ document, setDocument, layer, setLayer, tab, setTab }) {
 
         <div
           ref={scrollRef}
-          className="mt-6 w-full px-6 flex flex-col gap-2 overflow-y-auto flex-1 mb-6"
+          className="pt-6 w-full px-6 flex flex-col gap-2 overflow-y-scroll flex-1 mb-6"
         >
           <Reorder.Group
             axis="y"
@@ -100,16 +100,21 @@ function LayerItem({ item, i, layer, setLayer, setTab, deleteLayer, documentLeng
       dragListener={false}
       dragControls={controls}
       className="w-full flex flex-row gap-2 items-center"
+      style={{ touchAction: 'auto' }}
     >
       <div
-        className="cursor-grab active:cursor-grabbing p-2 opacity-50"
-        onPointerDown={(e) => controls.start(e)}
+        className="cursor-grab active:cursor-grabbing p-4 -m-2 opacity-50 flex items-center justify-center shrink-0"
+        style={{ touchAction: 'none' }}
+        onPointerDown={(e) => {
+          controls.start(e)
+        }}
       >
         <GripVertical size={24} color="white" />
       </div>
 
       <Button
         className="w-full"
+        onPointerDown={(e) => e.stopPropagation()}
         onClick={() => {
           setLayer(i)
           setTab(item.type)
@@ -122,7 +127,11 @@ function LayerItem({ item, i, layer, setLayer, setTab, deleteLayer, documentLeng
         </p>
       </Button>
 
-      <Button className="w-16 p-0" onClick={() => deleteLayer(i)}>
+      <Button
+        className="w-16 p-0"
+        onPointerDown={(e) => e.stopPropagation()}
+        onClick={() => deleteLayer(i)}
+      >
         <XIcon
           className="ts"
           size={20}
