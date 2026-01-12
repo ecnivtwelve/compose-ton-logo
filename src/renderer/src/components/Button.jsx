@@ -11,7 +11,13 @@ const Button = ({ children, tint, onClick, ...extraProps }) => {
   }
 
   return (
-    <div {...extraProps} className="ctl-pressable ctl-button" style={{ '--tint': tint }} onClick={handlePress} onPointerUp={playButtonSound}>
+    <div
+      {...extraProps}
+      className={'ctl-pressable ctl-button ' + extraProps.className}
+      style={{ '--tint': tint }}
+      onClick={handlePress}
+      onPointerUp={playButtonSound}
+    >
       {children}
     </div>
   )

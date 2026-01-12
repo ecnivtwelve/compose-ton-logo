@@ -99,3 +99,45 @@
   font-weight: 900;
   font-style: italic;
 }
+
+@font-face {
+  font-family: 'Aleo';
+  src: url('/fonts/Aleo-Bold.ttf');
+  font-weight: 700;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'LeckerliOne';
+  src: url('/fonts/LeckerliOne-Regular.ttf');
+  font-weight: 400;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'Limelight';
+  src: url('/fonts/Limelight-Regular.ttf');
+  font-weight: 400;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'Audiowide';
+  src: url('/fonts/Audiowide-Regular.ttf');
+  font-weight: 400;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'FasterOne';
+  src: url('/fonts/FasterOne-Regular.ttf');
+  font-weight: 400;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'Ribeye';
+  src: url('/fonts/Ribeye-Regular.ttf');
+  font-weight: 400;
+  font-style: italic;
+}

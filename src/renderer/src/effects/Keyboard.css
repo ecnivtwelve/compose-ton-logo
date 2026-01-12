@@ -15,6 +15,7 @@
   max-width: 1000px;
   pointer-events: auto;
   box-shadow: 0 10px 50px rgba(0, 0, 0, 1);
+  background-color: #00000099;
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.4);
 }

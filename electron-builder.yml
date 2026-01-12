@@ -13,7 +13,7 @@ asarUnpack:
 win:
   target:
     - dir
-  executableName: ComposeTonLogo
+  executableName: ComposeTonLogo-x64
   forceCodeSigning: false
 nsis:
   artifactName: ${name}-${version}-setup.${ext}

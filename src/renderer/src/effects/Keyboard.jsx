@@ -22,7 +22,9 @@ const KeyboardEffect = () => {
 
   useEffect(() => {
     const handleFocus = (e) => {
-      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+      const isTextInput = e.target.tagName === 'INPUT' && e.target.type === 'text'
+      const isTextArea = e.target.tagName === 'TEXTAREA'
+      if (isTextInput || isTextArea) {
         activeInputRef.current = e.target
         setIsVisible(true)
         // Initial sync when focus occurs
@@ -33,10 +35,12 @@ const KeyboardEffect = () => {
     }
 
     const handleClickOutside = (e) => {
+      const isTextInput = e.target.tagName === 'INPUT' && e.target.type === 'text'
+      const isTextArea = e.target.tagName === 'TEXTAREA'
       if (
         isVisible &&
-        e.target.tagName !== 'INPUT' &&
-        e.target.tagName !== 'TEXTAREA' &&
+        !isTextInput &&
+        !isTextArea &&
         !e.target.closest('.keyboard-wrapper') &&
         !e.target.closest('.hg-button')
       ) {
@@ -109,7 +113,9 @@ const KeyboardEffect = () => {
           exit={{ y: 500, opacity: 0 }}
           transition={{ type: 'spring', damping: 25, stiffness: 200 }}
           onMouseDown={(e) => {
-            if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+            const isTextInput = e.target.tagName === 'INPUT' && e.target.type === 'text'
+            const isTextArea = e.target.tagName === 'TEXTAREA'
+            if (!isTextInput && !isTextArea) {
               e.preventDefault()
             }
           }}

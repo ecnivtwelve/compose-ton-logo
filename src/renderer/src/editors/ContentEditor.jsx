@@ -1,13 +1,40 @@
-import { TypeIcon } from 'lucide-react'
+import { SearchIcon, TypeIcon, XIcon } from 'lucide-react'
 import { motion, AnimatePresence } from 'motion/react'
+import { useEffect, useState, useRef } from 'react'
 
-function ContentEditor({ tab, logoState, setLogoState }) {
+import popSound from '../assets/sounds/pop.mp3'
+import hitSound from '../assets/sounds/hit.mp3'
+import scrollSound from '../assets/sounds/scroll_2.ogg'
+import alertSound from '../assets/sounds/alert.ogg'
+import { symbolDefaultState, textDefaultState } from '../utils/consts'
+import Alert from '../effects/Alert'
+
+import frenchBadwords from 'french-badwords-list'
+import { array as badwords } from 'badwords-list'
+import { symbols } from '../utils/symbols'
+const allBadwords = [...frenchBadwords.array, ...badwords]
+
+function ContentEditor({ document, setDocument, layer }) {
+  const content = document[layer]
+
+  if (!content) {
+    return <div className="panel w-full h-full overflow-scroll relative" />
+  }
+
+  const setLayer = (newLayer) => {
+    setDocument((prev) => {
+      const newDocument = [...prev]
+      newDocument[layer] = newLayer
+      return newDocument
+    })
+  }
+
   return (
     <>
-      <div className="panel w-full h-full overflow-hidden relative">
+      <div className="panel w-full h-full overflow-scroll relative">
         <AnimatePresence mode="wait">
           <motion.div
-            key={tab.key}
+            key={document[layer].type}
             className="w-full h-full p-8 absolute"
             initial={{ x: 100, scale: 0.99, opacity: 0 }}
             animate={{
@@ -27,8 +54,12 @@ function ContentEditor({ tab, logoState, setLogoState }) {
               transition: { duration: 0.2, ease: [1, 0, 1, 1] }
             }}
           >
-            {tab.key === 'text' && (
-              <TextEditor tab={tab} logoState={logoState} setLogoState={setLogoState} />
+            {content.type == 'text' && (
+              <TextEditor tab={document[layer].type} content={content} setLayer={setLayer} />
+            )}
+
+            {content.type == 'symbols' && (
+              <SymbolEditor tab={document[layer].type} content={content} setLayer={setLayer} />
             )}
           </motion.div>
         </AnimatePresence>
@@ -37,9 +68,32 @@ function ContentEditor({ tab, logoState, setLogoState }) {
   )
 }
 
-function TextEditor({ logoState, setLogoState }) {
+function TextEditor({ content, setLayer }) {
+  const [isShaking, setIsShaking] = useState(false)
+  const [showProfanityAlert, setShowProfanityAlert] = useState(false)
+
+  const haveToFillError = () => {
+    const audio = new Audio(alertSound)
+    setIsShaking(false)
+    audio.play()
+    setTimeout(() => setIsShaking(true), 10)
+    setTimeout(() => setIsShaking(false), 500)
+  }
+
+  const inputRef = useRef(null)
+
   return (
     <div className="flex flex-col gap-6">
+      <Alert
+        visible={showProfanityAlert}
+        title="Pas de gros mots !"
+        message="Merci de composer ton logo avec un langage approprié."
+        confirmText="D'accord !"
+        confirmTint="var(--primary)"
+        onConfirm={() => setShowProfanityAlert(false)}
+        hideCancel
+      />
+
       <div className="flex flex-col gap-2">
         <p className="ts text-3xl font-semibold">Choisissez votre texte</p>
         <p className="ts text-lg font-regular opacity-70">
@@ -49,16 +103,512 @@ function TextEditor({ logoState, setLogoState }) {
         </p>
       </div>
 
-      <div className="ctl-pressable ctl-bw px-6 rounded-2xl flex items-center gap-4">
+      <motion.div
+        animate={isShaking ? { x: [-10, 10, -10, 10, 0] } : { x: 0 }}
+        transition={{ duration: 0.4 }}
+        className="ctl-pressable ctl-bw px-6 rounded-2xl flex items-center gap-4"
+      >
         <TypeIcon size={28} strokeWidth={2.5} className="ts" />
 
         <input
+          ref={inputRef}
           type="text"
           placeholder="Votre texte"
           className="ts color-white text-2xl font-medium py-4 w-full"
-          value={logoState.text}
-          onChange={(e) => setLogoState({ ...logoState, text: e.target.value })}
+          value={content.content}
+          onChange={(e) => setLayer({ ...content, content: e.target.value })}
+          onBlur={(e) => {
+            const badwords = allBadwords.filter((word) => e.target.value.includes(word))
+            if (badwords.length > 0) {
+              setIsShaking(true)
+              setShowProfanityAlert(true)
+              setLayer({ ...content, content: '' })
+            }
+          }}
         />
+
+        {content.content.length > 1 && (
+          <XIcon
+            size={32}
+            strokeWidth={2.5}
+            className="ts"
+            onClick={() => setLayer({ ...content, content: '' })}
+          />
+        )}
+      </motion.div>
+
+      <div
+        className="flex flex-col gap-6"
+        style={
+          content.content.length <= 0
+            ? {
+              opacity: 0.5,
+              filter: 'blur(2px)'
+            }
+            : {}
+        }
+        onClick={content.content.length <= 0 ? haveToFillError : undefined}
+      >
+        <div
+          className="flex flex-col gap-6"
+          style={{
+            pointerEvents: content.content.length <= 0 ? 'none' : 'auto'
+          }}
+        >
+          <div className="h-1" />
+
+          <div className="flex flex-col gap-2">
+            <p className="ts text-2xl font-semibold">Typographie</p>
+            <p className="ts text-lg font-regular opacity-70">
+              La typographie consiste à styliser les textes selon ton intention. Choisir Serif ou
+              Display donnera un aspect plus traditionnel a ton logo tandis qu’une typographie
+              sans-serif paraîtra plus moderne.
+            </p>
+          </div>
+
+          <FontSelector
+            currentFont={content.font ?? 'ComposeTonLogo'}
+            onFontSelect={(font) => setLayer({ ...content, font })}
+          />
+
+          <div className="h-1" />
+
+          <div className="flex flex-col gap-2">
+            <p className="ts text-2xl font-semibold">Couleurs</p>
+            <p className="ts text-lg font-regular opacity-70">
+              La couleur de votre texte sera utile pour lui donner un caractère. Vous pourrez
+              changer ce paramètre ultérieurement.
+            </p>
+          </div>
+
+          <ColorSelector
+            currentColor={content.textColor}
+            onColorSelect={(color) => setLayer({ ...content, textColor: color })}
+          />
+
+          <div className="h-1" />
+
+          <div className="flex flex-col gap-2">
+            <p className="ts text-2xl font-semibold">Réglages avancés</p>
+            <p className="ts text-lg font-regular opacity-70">
+              Ajoutez des options à votre texte pour en améliorer l’apparence
+            </p>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <div className="flex flex-row gap-3 items-center">
+              <p className="ts text-xl font-semibold w-56">Taille de police</p>
+              <Slider
+                value={content.size ?? 64}
+                range={[32, 256]}
+                unit={'px'}
+                defaultValue={textDefaultState.size}
+                onChange={(size) => setLayer({ ...content, size })}
+              />
+            </div>
+
+            <div className="flex flex-row gap-3 items-center">
+              <p className="ts text-xl font-semibold w-56">Largeur</p>
+              <Slider
+                value={content.width ?? 100}
+                range={[50, 200]}
+                unit={'%'}
+                defaultValue={textDefaultState.width}
+                onChange={(width) => setLayer({ ...content, width })}
+              />
+            </div>
+
+            <div className="flex flex-row gap-3 items-center">
+              <p className="ts text-xl font-semibold w-56">Ombre</p>
+              <Slider
+                value={content.shadow ?? 4}
+                range={[0, 20]}
+                unit={'px'}
+                defaultValue={textDefaultState.shadow}
+                onChange={(shadow) => setLayer({ ...content, shadow })}
+              />
+            </div>
+
+            <div className="flex flex-row gap-3 items-center">
+              <p className="ts text-xl font-semibold w-56">Bordure</p>
+              <Slider
+                value={content.border ?? 0}
+                range={[0, 10]}
+                unit={'px'}
+                defaultValue={textDefaultState.border}
+                onChange={(border) => setLayer({ ...content, border })}
+              />
+            </div>
+
+            <div className="flex flex-row gap-3 items-center">
+              <p className="ts text-xl font-semibold w-56">Interlettrage</p>
+              <Slider
+                value={content.letterSpacing ?? -5}
+                range={[-200, 400]}
+                unit={'%'}
+                defaultValue={textDefaultState.letterSpacing}
+                onChange={(letterSpacing) => setLayer({ ...content, letterSpacing })}
+              />
+            </div>
+
+            <div className="flex flex-row gap-3 items-center">
+              <p className="ts text-xl font-semibold w-56">Rotation</p>
+              <Slider
+                value={content.rotation ?? 0}
+                range={[-40, 40]}
+                unit={'°'}
+                defaultValue={textDefaultState.rotation}
+                onChange={(rotation) => setLayer({ ...content, rotation })}
+              />
+            </div>
+
+            <div className="flex flex-row gap-3 items-center">
+              <p className="ts text-xl font-semibold w-56">Axe X</p>
+              <Slider
+                value={content.x ?? 0}
+                range={[-200, 200]}
+                unit={'px'}
+                defaultValue={textDefaultState.x}
+                onChange={(x) => setLayer({ ...content, x })}
+              />
+            </div>
+
+            <div className="flex flex-row gap-3 items-center">
+              <p className="ts text-xl font-semibold w-56">Axe Y</p>
+              <Slider
+                value={content.y ?? 0}
+                range={[-400, 400]}
+                unit={'px'}
+                defaultValue={textDefaultState.y}
+                onChange={(y) => setLayer({ ...content, y })}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="h-10" />
+    </div>
+  )
+}
+
+function SymbolEditor({ content, setLayer }) {
+  return (
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-2">
+        <p className="ts text-3xl font-semibold">Choisissez des formes</p>
+        <p className="ts text-lg font-regular opacity-70">
+          Les formes géométriques servent à donner une intention claire au logo en jouant sur la
+          perception du public. Elles structurent le visuel, créent du rythme et transmettent des
+          émotions simple.
+        </p>
+      </div>
+
+      <SymbolSelector
+        selectedSymbol={content.symbol}
+        setSelectedSymbol={(symbol) => setLayer({ ...content, symbol })}
+      />
+
+      <div className="h-1" />
+
+      <div className="flex flex-col gap-2">
+        <p className="ts text-2xl font-semibold">Couleurs</p>
+        <p className="ts text-lg font-regular opacity-70">
+          La couleur de votre texte sera utile pour lui donner un caractère. Vous pourrez changer ce
+          paramètre ultérieurement.
+        </p>
+      </div>
+
+      <ColorSelector
+        currentColor={content.color}
+        onColorSelect={(color) => setLayer({ ...content, color: color })}
+      />
+
+      <div className="h-1" />
+
+      <div className="flex flex-col gap-2">
+        <p className="ts text-2xl font-semibold">Réglages avancés</p>
+        <p className="ts text-lg font-regular opacity-70">
+          Ajoutez des options à votre texte pour en améliorer l’apparence
+        </p>
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <div className="flex flex-row gap-3 items-center">
+          <p className="ts text-xl font-semibold w-56">Taille d'icône</p>
+          <Slider
+            value={content.size ?? 200}
+            range={[50, 600]}
+            unit={'px'}
+            defaultValue={symbolDefaultState.size}
+            onChange={(size) => setLayer({ ...content, size })}
+          />
+        </div>
+
+        <div className="flex flex-row gap-3 items-center">
+          <p className="ts text-xl font-semibold w-56">Axe X</p>
+          <Slider
+            value={content.x ?? 0}
+            range={[-200, 200]}
+            unit={'px'}
+            defaultValue={symbolDefaultState.x}
+            onChange={(x) => setLayer({ ...content, x })}
+          />
+        </div>
+
+        <div className="flex flex-row gap-3 items-center">
+          <p className="ts text-xl font-semibold w-56">Axe Y</p>
+          <Slider
+            value={content.y ?? 0}
+            range={[-400, 400]}
+            unit={'px'}
+            defaultValue={symbolDefaultState.y}
+            onChange={(y) => setLayer({ ...content, y })}
+          />
+        </div>
+
+        <div className="flex flex-row gap-3 items-center">
+          <p className="ts text-xl font-semibold w-56">Ombre</p>
+          <Slider
+            value={content.shadow ?? 4}
+            range={[0, 20]}
+            unit={'px'}
+            defaultValue={symbolDefaultState.shadow}
+            onChange={(shadow) => setLayer({ ...content, shadow })}
+          />
+        </div>
+
+        <div className="flex flex-row gap-3 items-center">
+          <p className="ts text-xl font-semibold w-56">Rotation</p>
+          <Slider
+            value={content.rotation ?? 0}
+            range={[-40, 40]}
+            unit={'°'}
+            defaultValue={symbolDefaultState.rotation}
+            onChange={(rotation) => setLayer({ ...content, rotation })}
+          />
+        </div>
+
+        <div className="flex flex-row gap-3 items-center">
+          <p className="ts text-xl font-semibold w-56">Contour</p>
+          <Slider
+            value={content.border ?? 0}
+            range={[0, 20]}
+            unit={'px'}
+            defaultValue={symbolDefaultState.border}
+            onChange={(border) => setLayer({ ...content, border })}
+          />
+        </div>
+      </div>
+
+      <div className="h-10" />
+    </div>
+  )
+}
+
+function SymbolSelector({ selectedSymbol, setSelectedSymbol }) {
+  const [selectedCategory, setSelectedCategory] = useState('Toutes')
+  const [searchTerms, setSearchTerms] = useState('')
+  const categories = ['Toutes', ...symbols.map((category) => category.category)]
+
+  const shownSymbols =
+    selectedCategory !== 'Toutes'
+      ? symbols.find((category) => category.category === selectedCategory).symbols
+      : symbols.flatMap((category) => category.symbols)
+
+  const filteredSymbols = shownSymbols.filter((symbol) =>
+    symbol.tags.toLowerCase().includes(searchTerms.toLowerCase())
+  )
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="ctl-pressable ctl-bw px-6 rounded-2xl flex items-center gap-4">
+        <SearchIcon size={28} strokeWidth={2.5} className="ts" />
+
+        <input
+          type="text"
+          placeholder="Rechercher"
+          className="ts color-white text-2xl font-medium py-3 w-full"
+          value={searchTerms}
+          onChange={(e) => setSearchTerms(e.target.value)}
+        />
+
+        <select
+          className="ts select color-white text-2xl font-medium py-3 w-70"
+          value={selectedCategory}
+          onChange={(e) => setSelectedCategory(e.target.value)}
+        >
+          {categories.map((category, i) => (
+            <option key={i} value={category}>
+              {category}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className="flex flex-col ctl-container py-3 px-3 h-66 rounded-2xl overflow-scroll">
+        <div className="grid gap-3 grid-cols-5 w-full">
+          {filteredSymbols.map((symbol, i) => {
+            const Icon = symbol.svg
+
+            return (
+              <div
+                className="p-2 h-18 rounded-2xl flex flex-column items-center justify-center"
+                key={i}
+                onClick={() => setSelectedSymbol(symbol)}
+                style={{
+                  borderColor: selectedSymbol === symbol ? '#fff' : 'transparent',
+                  borderWidth: 2,
+                  backgroundColor: selectedSymbol === symbol ? '#ffffff44' : '#ffffff00'
+                }}
+              >
+                <Icon fill={'white'} />
+              </div>
+            )
+          })}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function FontSelector({ text = 'Police', currentFont, onFontSelect }) {
+  const fonts = [
+    'Impact',
+    'Comic Sans MS',
+    'Aleo',
+    'Limelight',
+    'Arial Black',
+    'LeckerliOne',
+    'Audiowide',
+    'FasterOne',
+    'Ribeye'
+  ]
+
+  const playButtonSound = () => {
+    const buttonSound = new Audio(hitSound)
+    buttonSound.play()
+  }
+
+  return (
+    <div className="grid gap-4 grid-cols-3 w-full">
+      {fonts.map((font, i) => (
+        <div
+          key={i}
+          className={`ctl-pressable ctl-button p-2 h-18 rounded-2xl flex flex-column items-center justify-center ${currentFont == font ? 'ctl-selected' : ''}`}
+          style={{
+            '--tint': currentFont == font ? 'var(--primary)' : undefined
+          }}
+          onClick={() => {
+            playButtonSound()
+            onFontSelect(font)
+          }}
+        >
+          <p
+            className="ts text-4xl text-center"
+            style={{
+              fontFamily: font
+            }}
+          >
+            {text}
+          </p>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function ColorSelector({ currentColor, onColorSelect }) {
+  const colors = [
+    '#E65540', // Red/Orange
+    '#F1A340', // Orange/Gold
+    '#F3E54F', // Yellow
+    '#6DD36B', // Bright Green
+    '#57ACDE', // Sky Blue (Selected)
+    '#D34D91', // Pink/Magenta
+    '#FFFFFF', // White
+    '#8C3626', // Deep Red/Brown
+    '#8A6430', // Bronze/Brown
+    '#8F8B35', // Olive/Mustard
+    '#3B7C4F', // Forest Green
+    '#446E8C', // Muted/Steel Blue
+    '#7B3D64', // Deep Plum/Purple
+    '#000000' // Black
+  ]
+
+  const playButtonSound = () => {
+    const buttonSound = new Audio(popSound)
+    buttonSound.play()
+  }
+
+  return (
+    <div className="grid gap-2 grid-cols-7 w-full">
+      {colors.map((color, i) => (
+        <div
+          key={i}
+          className={`ctl-pressable ctl-button p-2 h-18 rounded-2xl flex flex-column items-center justify-center ${currentColor == color ? 'ctl-selected' : ''}`}
+          style={{
+            '--tint': color
+          }}
+          onClick={() => {
+            playButtonSound()
+            onColorSelect(color)
+          }}
+        ></div>
+      ))}
+    </div>
+  )
+}
+
+function Slider({ value, onChange, range, unit, defaultValue }) {
+  const [min, max] = range || [0, 100]
+
+  const [scrollLoop] = useState(() => {
+    const audio = new Audio(scrollSound)
+    audio.loop = true
+    return audio
+  })
+
+  const stopTimerRef = useRef(null)
+
+  useEffect(() => {
+    return () => {
+      scrollLoop.pause()
+      if (stopTimerRef.current) clearTimeout(stopTimerRef.current)
+    }
+  }, [scrollLoop])
+
+  const handleReset = () => {
+    if (defaultValue !== undefined) {
+      onChange(defaultValue)
+    }
+  }
+
+  return (
+    <div className="flex items-center gap-6 w-full">
+      <div className="relative flex-1 group">
+        <input
+          type="range"
+          min={min}
+          max={max}
+          step="1"
+          value={value}
+          onChange={(e) => {
+            onChange(parseInt(e.target.value))
+          }}
+          onDoubleClick={handleReset}
+          className="relative w-full h-3 bg-black/50 rounded-full appearance-none cursor-pointer border border-white/10 active:cursor-grabbing"
+          style={{
+            WebkitAppearance: 'none'
+          }}
+        />
+      </div>
+      <div
+        className="ctl-pressable ctl-bw px-5 py-2 rounded-2xl min-w-[100px] flex justify-center items-center shadow-lg bg-white/5 backdrop-blur-sm"
+        onClick={handleReset}
+      >
+        <span className="ts text-2xl font-bold">{value}</span>
+        <span className="ts text-sm font-medium opacity-60 ml-1 mt-1">{unit}</span>
       </div>
     </div>
   )
