@@ -3,9 +3,9 @@ import GalleryManager from './components/GalleryManager'
 import LayersEditor from './editors/LayersEditor'
 import ContentEditor from './editors/ContentEditor'
 import ContentPreview, { ContentRenderer } from './editors/ContentPreview'
-import { useMemo, useRef, useState } from 'react'
+import { useMemo, useRef, useState, useEffect } from 'react'
 import { toPng } from 'html-to-image'
-import { Airplay, ArrowLeft, AtSignIcon, Mail, XIcon } from 'lucide-react'
+import { Airplay, ArrowLeft, AtSignIcon, Mail, PlayIcon, XIcon } from 'lucide-react'
 import { defaultState, symbolDefaultState, textDefaultState } from './utils/consts'
 import Alert from './effects/Alert'
 import { ErrorBoundary } from 'react-error-boundary'
@@ -14,6 +14,9 @@ import Button from './components/Button'
 import Typography from './components/Typography'
 import FormData from 'form-data'
 import Mailgun from 'mailgun.js'
+import background from './assets/img/background.svg'
+import logo from './assets/img/logo.png'
+import credits from './assets/img/credits.svg'
 
 import doneSound from './assets/sounds/ctl_done.ogg'
 import upLight from './assets/img/up_light.png'
@@ -203,8 +206,136 @@ function App() {
   const [inactivityAlertVisible, setInactivityAlertVisible] = useState(false)
   const [inactivityCount, setInactivityCount] = useState(10)
 
+  const inactivityTimerRef = useRef(null)
+  const resetLogoRef = useRef(resetLogo)
+  useEffect(() => {
+    resetLogoRef.current = resetLogo
+  })
+
+  useEffect(() => {
+    if (!editingMode || inactivityAlertVisible) return
+
+    const resetTimer = () => {
+      if (inactivityTimerRef.current) clearTimeout(inactivityTimerRef.current)
+      inactivityTimerRef.current = setTimeout(() => {
+        setInactivityAlertVisible(true)
+        setInactivityCount(10)
+      }, 30000)
+    }
+
+    resetTimer()
+
+    const handleActivity = () => {
+      resetTimer()
+    }
+
+    const events = ['mousedown', 'mousemove', 'click', 'scroll', 'touchstart', 'keydown']
+    events.forEach((event) => {
+      window.addEventListener(event, handleActivity)
+    })
+
+    return () => {
+      if (inactivityTimerRef.current) clearTimeout(inactivityTimerRef.current)
+      events.forEach((event) => {
+        window.removeEventListener(event, handleActivity)
+      })
+    }
+  }, [editingMode, inactivityAlertVisible])
+
+  useEffect(() => {
+    if (!inactivityAlertVisible) return
+
+    const timer = setInterval(() => {
+      setInactivityCount((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer)
+          setInactivityAlertVisible(false)
+          setEditingMode(false)
+          resetLogoRef.current()
+          return 10
+        }
+        return prev - 1
+      })
+    }, 1000)
+
+    return () => clearInterval(timer)
+  }, [inactivityAlertVisible])
+
   if (!editingMode) {
-    return <div className="w-full h-full bg-red-300" onClick={() => setEditingMode(true)}></div>
+    return (
+      <div
+        className="w-full h-full flex items-center justify-center bg-black"
+        onClick={() => setEditingMode(true)}
+      >
+        <Button
+          tint="#12C958"
+          onClick={() => setEditingMode(true)}
+          style={{
+            position: 'absolute',
+            zIndex: 2,
+            bottom: 120
+          }}
+        >
+          <PlayIcon className="ts" size={32} fill="#FFF" />
+          <p className="ts text-3xl font-semibold">Créer mon logo</p>
+        </Button>
+
+        <Typography
+          style={{
+            position: 'absolute',
+            zIndex: 2,
+            bottom: 40,
+            textAlign: 'center'
+          }}
+          className="font-regular text-md"
+        >
+          <span className='font-semibold'>© 2025 IUT de Lannion — Département MMI — SAÉ 3.ALT</span>
+          <br />
+          Roxane OMNES et Vince LINISE
+        </Typography>
+
+        <img
+          src={credits}
+          style={{
+            position: 'absolute',
+            zIndex: 4,
+            bottom: 20,
+            right: 20,
+            height: 50,
+            filter: 'drop-shadow(0px 0px 4px rgba(0, 0, 0, 0.5))'
+          }}
+        />
+
+        <img
+          src={logo}
+          style={{
+            position: 'absolute',
+            zIndex: 2,
+            height: 300,
+            filter: 'drop-shadow(0px 0px 10px rgba(0, 0, 0, 0.5))'
+          }}
+        />
+
+        <motion.img
+          src={background}
+          alt=""
+          style={{
+            position: 'absolute',
+            zIndex: 1
+          }}
+          animate={{
+            rotate: [0, 360],
+            scale: [1.5]
+          }}
+          transition={{
+            duration: 25,
+            ease: 'linear',
+            repeat: Infinity,
+            repeatDelay: 1
+          }}
+        />
+      </div>
+    )
   }
 
   return (
@@ -223,7 +354,7 @@ function App() {
       )}
     >
       <Alert
-        visible={false}
+        visible={inactivityAlertVisible}
         title="Es-tu encore là ?"
         message="Tu es inactif depuis un moment. Veux-tu continuer à composer ton logo ?"
         cancelText={`Supprimer (${inactivityCount})`}
@@ -504,6 +635,10 @@ function App() {
               setTab(type)
             }}
             tabs={tabs}
+            quit={() => {
+              resetLogo()
+              setEditingMode(false)
+            }}
             reset={() => setResetConfirmVisible(true)}
             done={() => setAboutToSave(true)}
             history={() => setGalleryVisible(true)}
