@@ -1,7 +1,7 @@
 import { PlusIcon, XIcon, GripVertical } from 'lucide-react'
 import logo from '../assets/img/logo.png'
 import { symbolDefaultState, textDefaultState } from '../utils/consts'
-import { tabs } from '../App'
+import { tabs } from '../utils/tabs'
 import Button from '../components/Button'
 import { Reorder, useDragControls } from 'motion/react'
 import { AnimatePresence, motion } from 'motion/react'

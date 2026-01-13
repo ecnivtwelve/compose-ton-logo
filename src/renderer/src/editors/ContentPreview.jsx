@@ -3,6 +3,7 @@ import React, { useRef, useEffect } from 'react'
 import { Player } from '@lottiefiles/react-lottie-player'
 import sparksLottie from '../assets/lottie/sparks.json'
 import { motion, AnimatePresence } from 'motion/react'
+import { symbols } from '../utils/symbols'
 
 const allPatterns = import.meta.glob('../assets/img/patterns/*.png', {
   eager: true,
@@ -138,7 +139,18 @@ export function ContentRenderer({ document, animated = true, simplified = false 
                 </div>
               )
             } else if (layer.type == 'symbols') {
-              const Icon = layer.symbol.svg
+              let Icon = layer.symbol.svg
+
+              if (!Icon && layer.symbol.name) {
+                const allSymbols = symbols.flatMap((c) => c.symbols)
+                const found = allSymbols.find((s) => s.name === layer.symbol.name)
+                if (found) {
+                  Icon = found.svg
+                }
+              }
+
+              if (!Icon) return null
+
               const iconElement = (
                 <Icon
                   width={layer.size}

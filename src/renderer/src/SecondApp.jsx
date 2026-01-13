@@ -137,7 +137,7 @@ function App() {
         alt=""
         style={{
           position: 'absolute',
-          zIndex: 1
+          zIndex: -99
         }}
         animate={{
           rotate: [0, 360],

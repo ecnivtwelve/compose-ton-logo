@@ -1,11 +1,11 @@
-import { CheckIcon, DoorOpenIcon, RotateCcw } from 'lucide-react'
+import { CheckIcon, DoorOpenIcon, History, RotateCcw } from 'lucide-react'
 import Button from '../Button'
 import Typography from '../Typography'
 import { motion } from 'motion/react'
 
 import './CtlToolbar.css'
 
-function CtlToolbar({ selectedTab, setSelectedTab, tabs, reset, done, quit }) {
+function CtlToolbar({ selectedTab, setSelectedTab, tabs, reset, done, quit, history }) {
   return (
     <motion.div
       className="ctltoolbar flex gap-2 justify-between w-full px-10 py-6"
@@ -19,13 +19,17 @@ function CtlToolbar({ selectedTab, setSelectedTab, tabs, reset, done, quit }) {
           <DoorOpenIcon size={28} strokeWidth={2.5} className="ts" />
           <Typography className="font-semibold text-xl">Quitter</Typography>
         </Button>
+        <Button onClick={history}>
+          <History size={28} strokeWidth={2.5} className="ts" />
+          <Typography className="font-semibold text-xl">Historique</Typography>
+        </Button>
         <Button tint="#C52E2E" onClick={reset}>
           <RotateCcw size={28} strokeWidth={2.5} className="ts" />
           <Typography className="font-semibold text-xl">Recommencer</Typography>
         </Button>
       </div>
       <div className="flex gap-4 w-full justify-center">
-        {tabs.map((tab, index) => (
+        {tabs.map((tab) => (
           <Button
             key={tab.title}
             tint={selectedTab === tab.key ? 'var(--primary)' : undefined}

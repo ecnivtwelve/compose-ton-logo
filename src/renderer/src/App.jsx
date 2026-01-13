@@ -1,9 +1,10 @@
 import CtlToolbar from './components/CtlToolbar/CtlToolbar'
+import GalleryManager from './components/GalleryManager'
 import LayersEditor from './editors/LayersEditor'
 import ContentEditor from './editors/ContentEditor'
 import ContentPreview from './editors/ContentPreview'
 import { useState } from 'react'
-import { Airplay, ArrowLeft, ImagesIcon, ShapesIcon, TypeIcon } from 'lucide-react'
+import { Airplay, ArrowLeft } from 'lucide-react'
 import { defaultState, symbolDefaultState, textDefaultState } from './utils/consts'
 import Alert from './effects/Alert'
 import { ErrorBoundary } from 'react-error-boundary'
@@ -13,25 +14,8 @@ import Typography from './components/Typography'
 
 import doneSound from './assets/sounds/ctl_done.ogg'
 import upLight from './assets/img/up_light.png'
-import Intro from './components/Intro'
 
-export const tabs = [
-  {
-    key: 'text',
-    title: 'Texte',
-    icon: <TypeIcon size={28} strokeWidth={2.5} className="ts" />
-  },
-  {
-    key: 'symbols',
-    title: 'Symboles',
-    icon: <ShapesIcon size={28} strokeWidth={2.5} className="ts" />
-  },
-  {
-    key: 'background',
-    title: 'Arrière-plan',
-    icon: <ImagesIcon size={28} strokeWidth={2.5} className="ts" />
-  }
-]
+import { tabs } from './utils/tabs'
 
 function App() {
   const [document, setDocument] = useState(() =>
@@ -45,6 +29,77 @@ function App() {
 
   const [aboutToSave, setAboutToSave] = useState(false)
   const [sending, setSending] = useState(false)
+  const [currentLogoId, setCurrentLogoId] = useState(null)
+
+  const [galleryVisible, setGalleryVisible] = useState(false)
+
+  const [savedLogos, setSavedLogos] = useState(() => {
+    try {
+      const loaded = JSON.parse(localStorage.getItem('sentLogos') || '[]')
+      // Deduplicate by ID
+      const unique = Array.from(new Map(loaded.map((item) => [item.id, item])).values())
+
+      // Sort by timestamp if needed (already sorted by unshift, but good to be safe)
+      unique.sort((a, b) => b.timestamp - a.timestamp)
+
+      return unique
+    } catch (e) {
+      console.error('Failed to parse saved logos', e)
+      return []
+    }
+  })
+
+  const saveLogoToStorage = (doc) => {
+    const timestamp = Date.now()
+    const currentLogos = JSON.parse(localStorage.getItem('sentLogos') || '[]')
+    let updatedLogos = [...currentLogos]
+
+    if (currentLogoId) {
+      const index = updatedLogos.findIndex((l) => l.id === currentLogoId)
+      if (index !== -1) {
+        // Update existing
+        const item = updatedLogos.splice(index, 1)[0]
+        item.data = doc
+        item.timestamp = timestamp
+        updatedLogos.unshift(item)
+      } else {
+        // ID not found (maybe deleted?), treat as new
+        const newLogo = { id: currentLogoId, timestamp, data: doc }
+        updatedLogos.unshift(newLogo)
+      }
+    } else {
+      // New
+      const newId = Math.random().toString(36).substr(2, 9)
+      const newLogo = {
+        id: newId,
+        timestamp,
+        data: doc
+      }
+      updatedLogos.unshift(newLogo)
+      setCurrentLogoId(newId)
+    }
+
+    localStorage.setItem('sentLogos', JSON.stringify(updatedLogos))
+    setSavedLogos(updatedLogos)
+  }
+
+  const handleDeleteLogo = (id) => {
+    const updatedLogos = savedLogos.filter((l) => l.id !== id)
+    localStorage.setItem('sentLogos', JSON.stringify(updatedLogos))
+    setSavedLogos(updatedLogos)
+  }
+
+  const handleClearAll = () => {
+    localStorage.removeItem('sentLogos')
+    setSavedLogos([])
+  }
+
+  const handleReinject = (logo) => {
+    setDocument(logo.data)
+    setCurrentLogoId(logo.id)
+    setGalleryVisible(false)
+    setAboutToSave(true)
+  }
 
   const startSending = () => {
     setSending(false)
@@ -52,6 +107,7 @@ function App() {
       const doneAudio = new Audio(doneSound)
       doneAudio.play()
       setSending(true)
+      saveLogoToStorage(document)
 
       const serializableDoc = document.map((layer) => {
         if (layer.type === 'symbols' && layer.symbol) {
@@ -72,7 +128,7 @@ function App() {
 
   return (
     <ErrorBoundary
-      fallbackRender={({ error, resetErrorBoundary }) => (
+      fallbackRender={({ error }) => (
         <Alert
           visible={true}
           title="Quelque chose s'est mal passé !"
@@ -94,6 +150,7 @@ function App() {
             defaultState.map((s) => ({ ...s, id: Math.random().toString(36).substr(2, 9) }))
           )
           setLayer(1)
+          setCurrentLogoId(null)
           setAboutToSave(false)
           setResetConfirmVisible(false)
         }}
@@ -218,7 +275,7 @@ function App() {
                   </Button>
                   <Button tint="#12C958" onClick={() => startSending()}>
                     <Airplay size={28} strokeWidth={2.5} className="ts" />
-                    <Typography className="font-semibold text-xl">Envoyer à l'écran</Typography>
+                    <Typography className="font-semibold text-xl">Envoyer à l&apos;écran</Typography>
                   </Button>
                 </motion.div>
               )}
@@ -264,9 +321,18 @@ function App() {
             tabs={tabs}
             reset={() => setResetConfirmVisible(true)}
             done={() => setAboutToSave(true)}
+            history={() => setGalleryVisible(true)}
           />
         )}
       </AnimatePresence>
+      <GalleryManager
+        visible={galleryVisible}
+        onClose={() => setGalleryVisible(false)}
+        savedLogos={savedLogos}
+        onReinject={handleReinject}
+        onDelete={handleDeleteLogo}
+        onClearAll={handleClearAll}
+      />
     </ErrorBoundary>
   )
 }
