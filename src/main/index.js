@@ -1,4 +1,4 @@
-import { app, shell, BrowserWindow, ipcMain } from 'electron'
+import { app, shell, BrowserWindow, ipcMain, screen } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
@@ -89,10 +89,17 @@ app.whenReady().then(() => {
 })
 
 function createSecondWindow() {
+  const displays = screen.getAllDisplays()
+  const externalDisplay = displays.find((display) => {
+    return display.bounds.x !== 0 || display.bounds.y !== 0
+  })
+
   const secondWindow = new BrowserWindow({
     width: 1600,
     height: 900,
-    fullscreen: false,
+    x: externalDisplay ? externalDisplay.bounds.x : undefined,
+    y: externalDisplay ? externalDisplay.bounds.y : undefined,
+    fullscreen: !!externalDisplay,
     fullscreenable: true,
     show: false,
     autoHideMenuBar: true,

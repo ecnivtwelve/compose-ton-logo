@@ -125,7 +125,10 @@ function App() {
                 overflow: 'hidden',
                 position: 'absolute',
                 filter: 'drop-shadow(0px 0px 100px rgba(0, 0, 0, 0.5))',
-                zIndex: 9999
+                zIndex: 9999,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
               }}
               initial={{
                 y: 1000,
