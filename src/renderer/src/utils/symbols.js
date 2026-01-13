@@ -50,6 +50,32 @@ import CarreauIcon from '../assets/svg/Carreau.svg?react'
 import TrefleIcon from '../assets/svg/Trefle.svg?react'
 import LunePixelIcon from '../assets/svg/LunePixel.svg?react'
 
+import BatterieIcon from '../assets/svg/Batterie.svg?react'
+import CarglassIcon from '../assets/svg/Carglass.svg?react'
+import CarreContourPointuIcon from '../assets/svg/Carré-contour-pointu.svg?react'
+import CarreContourRondIcon from '../assets/svg/Carré-contour-rond.svg?react'
+import CarreRempliPointuIcon from '../assets/svg/Carré-rempli-pointu.svg?react'
+import CarreRempliRondIcon from '../assets/svg/Carré-rempli-rond.svg?react'
+import FastFoodIcon from '../assets/svg/FastFood.svg?react'
+import FluteIcon from '../assets/svg/Flute.svg?react'
+import GuitareIcon from '../assets/svg/Guitare.svg?react'
+import HarpeIcon from '../assets/svg/Harpe.svg?react'
+import PianoIcon from '../assets/svg/Piano.svg?react'
+import PizzaIcon from '../assets/svg/Pizza.svg?react'
+import RamenIcon from '../assets/svg/Ramen.svg?react'
+import TelepheriqueIcon from '../assets/svg/Telepherique.svg?react'
+import TheIcon from '../assets/svg/The.svg?react'
+import TrainIcon from '../assets/svg/Train.svg?react'
+import TriangleRempliPointuIcon from '../assets/svg/Traingle-rempli-pointu.svg?react'
+import TriangleRempliRondIcon from '../assets/svg/Traingle-rempli-rond.svg?react'
+import TriangleContourPointuIcon from '../assets/svg/Triangle-contour-pointu.svg?react'
+import TriangleContourRondIcon from '../assets/svg/Triangle-contour-rond.svg?react'
+import ViandeIcon from '../assets/svg/Viande.svg?react'
+import VoitureBelleIcon from '../assets/svg/Voiture-belle.svg?react'
+import VoitureClassicIcon from '../assets/svg/Voiture-classic.svg?react'
+import RondContourIcon from '../assets/svg/rond-contour.svg?react'
+import RondRempliIcon from '../assets/svg/rond-rempli.svg?react'
+
 export const symbols = [
   {
     category: 'Cinéma',
@@ -108,6 +134,26 @@ export const symbols = [
         name: 'Note stylisée',
         tags: 'musique, note, son, instrument',
         svg: NoteStyleIcon
+      },
+      {
+        name: 'Flûte',
+        tags: 'musique, instrument, flûte',
+        svg: FluteIcon
+      },
+      {
+        name: 'Guitare',
+        tags: 'musique, instrument, guitare',
+        svg: GuitareIcon
+      },
+      {
+        name: 'Harpe',
+        tags: 'musique, instrument, harpe',
+        svg: HarpeIcon
+      },
+      {
+        name: 'Piano',
+        tags: 'musique, instrument, piano',
+        svg: PianoIcon
       }
     ]
   },
@@ -308,6 +354,131 @@ export const symbols = [
         name: 'Lune Pixel',
         tags: 'lune, pixel, game',
         svg: LunePixelIcon
+      }
+    ]
+  },
+  {
+    category: 'Gastronomie',
+    symbols: [
+      {
+        name: 'Fast Food',
+        tags: 'gastronomie, nourriture, fast food, burger',
+        svg: FastFoodIcon
+      },
+      {
+        name: 'Pizza',
+        tags: 'gastronomie, nourriture, pizza',
+        svg: PizzaIcon
+      },
+      {
+        name: 'Ramen',
+        tags: 'gastronomie, nourriture, ramen, nouilles',
+        svg: RamenIcon
+      },
+      {
+        name: 'Thé',
+        tags: 'gastronomie, boisson, thé, tea',
+        svg: TheIcon
+      },
+      {
+        name: 'Viande',
+        tags: 'gastronomie, nourriture, viande, meat',
+        svg: ViandeIcon
+      }
+    ]
+  },
+  {
+    category: 'Transport',
+    symbols: [
+      {
+        name: 'Téléphérique',
+        tags: 'transport, montagne, téléphérique',
+        svg: TelepheriqueIcon
+      },
+      {
+        name: 'Train',
+        tags: 'transport, train',
+        svg: TrainIcon
+      },
+      {
+        name: 'Voiture',
+        tags: 'transport, voiture, car',
+        svg: VoitureBelleIcon
+      },
+      {
+        name: 'Voiture classique',
+        tags: 'transport, voiture, classique, car',
+        svg: VoitureClassicIcon
+      },
+      {
+        name: 'Carglass',
+        tags: 'transport, voiture, pare-brise, carglass',
+        svg: CarglassIcon
+      }
+    ]
+  },
+  {
+    category: 'Formes',
+    symbols: [
+      {
+        name: 'Carré contour pointu',
+        tags: 'forme, carré, contour, pointu',
+        svg: CarreContourPointuIcon
+      },
+      {
+        name: 'Carré contour rond',
+        tags: 'forme, carré, contour, rond',
+        svg: CarreContourRondIcon
+      },
+      {
+        name: 'Carré rempli pointu',
+        tags: 'forme, carré, rempli, pointu',
+        svg: CarreRempliPointuIcon
+      },
+      {
+        name: 'Carré rempli rond',
+        tags: 'forme, carré, rempli, rond',
+        svg: CarreRempliRondIcon
+      },
+      {
+        name: 'Triangle contour pointu',
+        tags: 'forme, triangle, contour, pointu',
+        svg: TriangleContourPointuIcon
+      },
+      {
+        name: 'Triangle contour rond',
+        tags: 'forme, triangle, contour, rond',
+        svg: TriangleContourRondIcon
+      },
+      {
+        name: 'Triangle rempli pointu',
+        tags: 'forme, triangle, rempli, pointu',
+        svg: TriangleRempliPointuIcon
+      },
+      {
+        name: 'Triangle rempli rond',
+        tags: 'forme, triangle, rempli, rond',
+        svg: TriangleRempliRondIcon
+      },
+      {
+        name: 'Rond contour',
+        tags: 'forme, rond, contour',
+        svg: RondContourIcon
+      },
+      {
+        name: 'Rond rempli',
+        tags: 'forme, rond, rempli',
+        svg: RondRempliIcon
+      }
+    ]
+  },
+  {
+    category: 'Divers',
+    symbols: [
+      {
+        name: 'Batterie',
+        tags: 'divers, batterie, énergie',
+        svg: BatterieIcon
       }
     ]
   }
