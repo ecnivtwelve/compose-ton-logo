@@ -22,6 +22,13 @@ function createWindow() {
     mainWindow.show()
   })
 
+  mainWindow.webContents.on('before-input-event', (event, input) => {
+    if (input.key === 'F11') {
+      mainWindow.setFullScreen(!mainWindow.isFullScreen())
+      event.preventDefault()
+    }
+  })
+
   mainWindow.webContents.setWindowOpenHandler((details) => {
     shell.openExternal(details.url)
     return { action: 'deny' }
@@ -59,8 +66,10 @@ app.whenReady().then(() => {
   })
 
   ipcMain.on('toggle-fullscreen', (event) => {
-    const mainWindow = BrowserWindow.getFocusedWindow()
-    mainWindow.setFullScreen(!mainWindow.isFullScreen())
+    const win = BrowserWindow.fromWebContents(event.sender)
+    if (win) {
+      win.setFullScreen(!win.isFullScreen())
+    }
   })
 
   ipcMain.on('quit-app', () => {
@@ -68,13 +77,76 @@ app.whenReady().then(() => {
   })
 
   createWindow()
+  createSecondWindow()
+
+  ipcMain.on('message-from-second', (event, arg) => {
+    console.log(arg)
+    // Optionally reply
+    event.reply('message', 'Pong from Main')
+    // Optionally forward to main window
+    const mainWindow = BrowserWindow.getAllWindows().find(
+      (w) => w !== event.sender.getOwnerBrowserWindow()
+    )
+    if (mainWindow) {
+      mainWindow.webContents.send('message', `Second window says: ${arg}`)
+    }
+  })
 
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
-    if (BrowserWindow.getAllWindows().length === 0) createWindow()
+    if (BrowserWindow.getAllWindows().length === 0) {
+      createWindow()
+      createSecondWindow()
+    }
   })
 })
+
+function createSecondWindow() {
+  const secondWindow = new BrowserWindow({
+    width: 1600,
+    height: 900,
+    fullscreen: false,
+    show: false,
+    autoHideMenuBar: true,
+    ...(process.platform === 'linux' ? { icon } : {}),
+    webPreferences: {
+      preload: join(__dirname, '../preload/index.js'),
+      sandbox: false
+    }
+  })
+
+  secondWindow.on('ready-to-show', () => {
+    secondWindow.show()
+  })
+
+  secondWindow.webContents.on('before-input-event', (event, input) => {
+    if (input.key === 'F11') {
+      secondWindow.setFullScreen(!secondWindow.isFullScreen())
+      event.preventDefault()
+    }
+  })
+
+  secondWindow.on('open-devtools', (event) => {
+    const webContents = event.sender
+    webContents.openDevTools()
+  })
+
+  secondWindow.on('quit-app', () => {
+    app.quit()
+  })
+
+  secondWindow.webContents.setWindowOpenHandler((details) => {
+    shell.openExternal(details.url)
+    return { action: 'deny' }
+  })
+
+  if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
+    secondWindow.loadURL(`${process.env['ELECTRON_RENDERER_URL']}/second.html`)
+  } else {
+    secondWindow.loadFile(join(__dirname, '../renderer/second.html'))
+  }
+}
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
