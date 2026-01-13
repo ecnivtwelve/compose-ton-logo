@@ -64,6 +64,9 @@ function LayersEditor({ document, setDocument, layer, setLayer, tab, setTab }) {
         animate={{ opacity: 1, x: 0 }}
         exit={{ opacity: 0, x: -600 }}
         transition={{ duration: 0.4, ease: [0.3, 0, 0, 1] }}
+        style={{
+          maxWidth: '412px'
+        }}
       >
         <img src={logo} alt="" className="mt-[-50px] h-22 ts" />
 
@@ -112,7 +115,7 @@ function LayersEditor({ document, setDocument, layer, setLayer, tab, setTab }) {
               onClick={createNewLayer}
             >
               <PlusIcon className="ts" size={28} strokeWidth={2.5} />
-              <p className="ts text-left w-full font-semibold text-lg">
+              <p className="ts text-left w-full font-semibold text-lg truncate min-w-0">
                 Nouveau {tab === 'text' ? 'texte' : tab === 'symbols' ? 'symbole' : 'fond'}
               </p>
             </Button>
@@ -143,7 +146,7 @@ function LayerItem({ item, i, layer, setLayer, setTab, deleteLayer, documentLeng
       {isFixed && <div className="w-12" />}
 
       <Button
-        className="w-full"
+        className="flex-1 min-w-0"
         onPointerDown={(e) => e.stopPropagation()}
         onClick={() => {
           setLayer(i)
@@ -152,7 +155,7 @@ function LayerItem({ item, i, layer, setLayer, setTab, deleteLayer, documentLeng
         tint={layer == i ? 'var(--primary)' : undefined}
       >
         {tabs.find((tab) => tab.key == item.type).icon}
-        <p className="ts text-left w-full font-semibold text-lg">
+        <p className="ts text-left w-full font-semibold text-lg truncate min-w-0">
           {item.type === 'background'
             ? 'Arrière-plan'
             : item.type === 'text' && item.content.trim().length > 0

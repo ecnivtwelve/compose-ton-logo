@@ -7,6 +7,8 @@ import { AnimatePresence, motion } from 'motion/react'
 import downLight from './assets/img/down_light.png'
 import overlay from './assets/img/projo_overlay.png'
 import LogoGallery from './components/LogoGallery'
+import Intro from './components/Intro'
+import background from './assets/img/present_background.png'
 
 function App() {
   const [logoGallery, setLogoGallery] = useState([])
@@ -63,6 +65,8 @@ function App() {
     }
   }, [logoData, currentLogoIncrement])
 
+  const [isIntro, setIsIntro] = useState(true)
+
   return (
     <ErrorBoundary
       fallbackRender={({ error }) => (
@@ -78,6 +82,19 @@ function App() {
         />
       )}
     >
+      <div
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          zIndex: 99999999,
+          width: '100%',
+          height: '100%'
+        }}
+      >
+        <AnimatePresence>{isIntro && <Intro onEnd={() => setIsIntro(false)} />}</AnimatePresence>
+      </div>
+
       <LogoGallery logos={logoGallery} />
 
       <motion.img
@@ -114,6 +131,25 @@ function App() {
           key={currentLogoIncrement}
         />
       )}
+
+      <motion.img
+        src={background}
+        alt=""
+        style={{
+          position: 'absolute',
+          zIndex: 1
+        }}
+        animate={{
+          rotate: [0, 360],
+          scale: [1.5]
+        }}
+        transition={{
+          duration: 40,
+          ease: 'linear',
+          repeat: Infinity,
+          repeatDelay: 1
+        }}
+      />
 
       <div className="w-full h-full flex align-center justify-center">
         <AnimatePresence>

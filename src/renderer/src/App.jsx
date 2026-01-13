@@ -62,13 +62,12 @@ function App() {
         return layer
       })
       window.electron.ipcRenderer.send('send-logo', serializableDoc)
+
+      setTimeout(() => {
+        setAboutToSave(false)
+        setSending(false)
+      }, 2000)
     }, 100)
-  }
-
-  const [isIntro, setIsIntro] = useState(true)
-
-  if (isIntro) {
-    return <Intro onEnd={() => setIsIntro(false)} />
   }
 
   return (
@@ -202,10 +201,14 @@ function App() {
                   transition={{ duration: 0.5, delay: 0.3, ease: [0.3, 0, 0, 1] }}
                 >
                   <Button
-                    tint="#C52E2E"
+                    tint={!sending && '#C52E2E'}
                     onClick={() => {
+                      if (sending) return false
                       setAboutToSave(false)
                       setSending(false)
+                    }}
+                    style={{
+                      opacity: sending ? 0.5 : 1
                     }}
                   >
                     <ArrowLeft size={28} strokeWidth={2.5} className="ts" />

@@ -1,28 +1,75 @@
 import background from '../assets/img/background.svg'
-import introVideo from '../assets/video/intro.webm'
 import { motion } from 'motion/react'
-import Typography from './Typography'
-import Button from './Button'
 import { useEffect } from 'react'
 import { useState } from 'react'
+import introVideo from '../assets/video/intro.webm'
+import ctlRev from '../assets/video/ctl_REV.webm'
+import { useRef } from 'react'
 
 const Intro = ({ onEnd }) => {
-  const [isStartButtonVisible, setIsStartButtonVisible] = useState(false)
+  const [hasIntroStarted, setHasIntroStarted] = useState(false)
+
+  const ctlRevRef = useRef()
+  const introVideoRef = useRef()
+
+  const hasStarted = useRef(false)
+  const timeouts = useRef([])
+
+  const handlePlay = () => {
+    if (hasStarted.current) return
+    hasStarted.current = true
+
+    const t1 = setTimeout(() => {
+      setHasIntroStarted(true)
+    }, 3000)
+    const t2 = setTimeout(() => {
+      introVideoRef.current?.play()
+    }, 4500)
+    const t3 = setTimeout(() => {
+      // setIsStartButtonVisible(true)
+    }, 9000)
+    const t4 = setTimeout(() => {
+      onEnd()
+    }, 15000)
+
+    timeouts.current = [t1, t2, t3, t4]
+  }
 
   useEffect(() => {
-    setTimeout(() => {
-      setIsStartButtonVisible(true)
-    }, 2000)
+    ctlRevRef.current?.play()?.catch(() => { })
+    return () => {
+      timeouts.current.forEach(clearTimeout)
+    }
   }, [])
 
   return (
-    <div className="w-full h-full flex items-center justify-center" onClick={onEnd}>
+    <motion.div
+      className="w-full h-full flex items-center justify-center bg-black"
+      onClick={onEnd}
+      initial={{ opacity: 1 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0, transition: { duration: 1 } }}
+    >
       <video
-        src={introVideo}
-        autoPlay
+        ref={ctlRevRef}
+        src={ctlRev}
+        onPlaying={handlePlay}
         style={{
           position: 'absolute',
-          zIndex: -9,
+          zIndex: 9,
+          width: '100%',
+          height: '100%',
+          top: 0,
+          left: 0
+        }}
+      />
+
+      <video
+        ref={introVideoRef}
+        src={introVideo}
+        style={{
+          position: 'absolute',
+          zIndex: 6,
           width: '100%',
           height: '100%',
           objectFit: 'cover',
@@ -31,38 +78,27 @@ const Intro = ({ onEnd }) => {
         }}
       />
 
-      {isStartButtonVisible && (
-        <Button
+      {hasIntroStarted && (
+        <motion.img
+          src={background}
+          alt=""
           style={{
             position: 'absolute',
-            bottom: 80
+            zIndex: 1
           }}
-          onClick={onEnd}
-          tint={'var(--primary)'}
-        >
-          <Typography className="text-3xl font-semibold mx-3 my-1">Appuyez ici pour commencer</Typography>
-        </Button>
+          animate={{
+            rotate: [0, 360],
+            scale: [1.5]
+          }}
+          transition={{
+            duration: 25,
+            ease: 'linear',
+            repeat: Infinity,
+            repeatDelay: 1
+          }}
+        />
       )}
-
-      <motion.img
-        src={background}
-        alt=""
-        style={{
-          position: 'absolute',
-          zIndex: -99
-        }}
-        animate={{
-          rotate: [0, 360],
-          scale: [1.5]
-        }}
-        transition={{
-          duration: 25,
-          ease: 'linear',
-          repeat: Infinity,
-          repeatDelay: 1
-        }}
-      />
-    </div>
+    </motion.div>
   )
 }
 

@@ -76,7 +76,7 @@ export function ContentRenderer({ document, animated = true, simplified = false 
           maskImage: !simplified
             ? 'linear-gradient(0deg, rgba(255, 255, 255, 0.00) 0%, #FFF 10%, #FFF 90%, rgba(255, 255, 255, 0.00) 100%)'
             : 'none',
-          maxWidth: 500
+          maxWidth: 700
         }}
       >
         <div
