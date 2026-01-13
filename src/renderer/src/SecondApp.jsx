@@ -5,11 +5,17 @@ import Alert from './effects/Alert'
 import { ErrorBoundary } from 'react-error-boundary'
 import { AnimatePresence, motion } from 'motion/react'
 import downLight from './assets/img/down_light.png'
+import LogoGallery from './components/LogoGallery'
 
 function App() {
   const [logoGallery, setLogoGallery] = useState([])
   const [logoData, setLogoData] = useState(null)
   const [currentLogoIncrement, setCurrentLogoIncrement] = useState(0)
+
+  const addToLogoGallery = (logo) => {
+    setLogoGallery((prev) => [...prev, logo])
+    console.log(logoGallery)
+  }
 
   useEffect(() => {
     console.log('SecondApp mounted, setting up IPC listener')
@@ -28,8 +34,8 @@ function App() {
         return layer
       })
       setLogoData(hydratedDoc)
-      setLogoGallery([...logoGallery, hydratedDoc])
       setCurrentLogoIncrement((prev) => prev + 1)
+      addToLogoGallery(hydratedDoc)
     }
 
     if (window.electron && window.electron.ipcRenderer) {
@@ -61,6 +67,7 @@ function App() {
         />
       )}
     >
+      <LogoGallery logos={logoGallery} />
       <motion.img
         src={downLight}
         style={{

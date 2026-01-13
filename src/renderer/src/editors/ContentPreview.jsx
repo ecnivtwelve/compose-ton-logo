@@ -66,24 +66,25 @@ function ContentPreview({ document }) {
   )
 }
 
-export function ContentRenderer({ document, animated = true }) {
-  console.log(document)
+export function ContentRenderer({ document, animated = true, simplified = false }) {
   return (
     <>
       <div
         className="w-full h-full flex flex-col items-center justify-center position-relative overflow-hidden"
         style={{
           // mask all borders
-          maskImage:
-            'linear-gradient(0deg, rgba(255, 255, 255, 0.00) 0%, #FFF 10%, #FFF 90%, rgba(255, 255, 255, 0.00) 100%)'
+          maskImage: !simplified
+            ? 'linear-gradient(0deg, rgba(255, 255, 255, 0.00) 0%, #FFF 10%, #FFF 90%, rgba(255, 255, 255, 0.00) 100%)'
+            : 'none'
         }}
       >
         <div
           className="w-full h-full flex flex-col items-center justify-center position-relative overflow-hidden"
           style={{
             // mask all borders
-            maskImage:
-              'linear-gradient(270deg, rgba(255, 255, 255, 0.00) 0%, #FFF 10%, #FFF 90%, rgba(255, 255, 255, 0.00) 100%)'
+            maskImage: !simplified
+              ? 'linear-gradient(270deg, rgba(255, 255, 255, 0.00) 0%, #FFF 10%, #FFF 90%, rgba(255, 255, 255, 0.00) 100%)'
+              : 'none'
           }}
         >
           {document.map((layer) => {
@@ -108,7 +109,9 @@ export function ContentRenderer({ document, animated = true }) {
                             fontFamily: layer.font ?? '',
                             color: layer.textColor ?? '#fff',
                             fontSize: layer.size ? `${layer.size}px` : '48px',
-                            filter: `drop-shadow(0px 0px ${layer.shadow}px rgba(0, 0, 0, 0.8))`,
+                            filter: !simplified
+                              ? `drop-shadow(0px 0px ${layer.shadow}px rgba(0, 0, 0, 0.8))`
+                              : 'none',
                             letterSpacing: `${layer.letterSpacing / 1000}em`,
                             maxWidth: '100%',
                             whiteSpace: 'pre-wrap',
@@ -150,7 +153,9 @@ export function ContentRenderer({ document, animated = true }) {
                           strokeWidth={layer.border / 10}
                           stroke="#000"
                           style={{
-                            filter: `drop-shadow(0px 0px ${layer.shadow}px rgba(0, 0, 0, 0.8))`,
+                            filter: !simplified
+                              ? `drop-shadow(0px 0px ${layer.shadow}px rgba(0, 0, 0, 0.8))`
+                              : 'none',
                             overflow: 'visible'
                           }}
                         />
