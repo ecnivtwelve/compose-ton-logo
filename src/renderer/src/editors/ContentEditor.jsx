@@ -182,9 +182,9 @@ function TextEditor({ content, setLayer }) {
         style={
           content.content.length <= 0
             ? {
-              opacity: 0.5,
-              filter: 'blur(2px)'
-            }
+                opacity: 0.5,
+                filter: 'blur(2px)'
+              }
             : {}
         }
         onClick={content.content.length <= 0 ? haveToFillError : undefined}

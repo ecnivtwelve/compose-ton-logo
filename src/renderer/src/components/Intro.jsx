@@ -36,7 +36,7 @@ const Intro = ({ onEnd }) => {
   }
 
   useEffect(() => {
-    ctlRevRef.current?.play()?.catch(() => { })
+    ctlRevRef.current?.play()?.catch(() => {})
     return () => {
       timeouts.current.forEach(clearTimeout)
     }

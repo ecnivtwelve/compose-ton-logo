@@ -1,33 +1,33 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react'
 
 const ClickEffect = () => {
-  const [clicks, setClicks] = useState([]);
+  const [clicks, setClicks] = useState([])
 
   useEffect(() => {
     const handleClick = (e) => {
-      const app = document.getElementById('app');
-      if (!app) return;
+      const app = document.getElementById('app')
+      if (!app) return
 
-      const rect = app.getBoundingClientRect();
-      const scale = rect.width / 1920;
+      const rect = app.getBoundingClientRect()
+      const scale = rect.width / 1920
 
       const newClick = {
         id: Date.now(),
         x: (e.clientX - rect.left) / scale,
-        y: (e.clientY - rect.top) / scale,
-      };
+        y: (e.clientY - rect.top) / scale
+      }
 
-      setClicks((prevClicks) => [...prevClicks, newClick]);
-    };
+      setClicks((prevClicks) => [...prevClicks, newClick])
+    }
 
-    document.addEventListener('click', handleClick);
-    return () => document.removeEventListener('click', handleClick);
-  }, []);
+    document.addEventListener('click', handleClick)
+    return () => document.removeEventListener('click', handleClick)
+  }, [])
 
   const handleAnimationEnd = (id) => {
     // Remove the element from DOM state after animation finishes
-    setClicks((prevClicks) => prevClicks.filter((click) => click.id !== id));
-  };
+    setClicks((prevClicks) => prevClicks.filter((click) => click.id !== id))
+  }
 
   return (
     <>
@@ -69,7 +69,7 @@ const ClickEffect = () => {
         />
       ))}
     </>
-  );
-};
+  )
+}
 
-export default ClickEffect;
+export default ClickEffect

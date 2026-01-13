@@ -42,15 +42,9 @@ function DevTools() {
       </style>
 
       <div className="dev-tools">
-        <button onClick={toggleFullscreen}>
-          Toggle fullscreen
-        </button>
-        <button onClick={handleDebug}>
-          Debug
-        </button>
-        <button onClick={handleQuit}>
-          Quitter
-        </button>
+        <button onClick={toggleFullscreen}>Toggle fullscreen</button>
+        <button onClick={handleDebug}>Debug</button>
+        <button onClick={handleQuit}>Quitter</button>
       </div>
     </>
   )

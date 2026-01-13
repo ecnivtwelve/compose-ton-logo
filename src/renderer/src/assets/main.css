@@ -1,5 +1,5 @@
-@import "tailwindcss";
-@import "./css/fonts.css";
+@import 'tailwindcss';
+@import './css/fonts.css';
 
 * {
   user-select: none;
@@ -20,10 +20,21 @@ body {
 }
 
 :root {
-  --ctl-gradient: linear-gradient(180deg, rgba(227, 95, 142, 0.40) 0%, rgba(227, 95, 142, 0.00) 50%), linear-gradient(180deg, #A7A6B3 0%, #A5A4B2 32.21%, #BDB9C7 66.83%, #EFEFEF 84.13%, #F6F0F4 100%), #333;
-  --primary: #E35F8E;
-  --text: #FFFFFF;
-  --text-shadow: drop-shadow(0px 0px 2px rgba(0, 0, 0, 1)) drop-shadow(0px 0px 2px rgba(0, 0, 0, 0.5));
+  --ctl-gradient:
+    linear-gradient(180deg, rgba(227, 95, 142, 0.4) 0%, rgba(227, 95, 142, 0) 50%),
+    linear-gradient(
+      180deg,
+      #a7a6b3 0%,
+      #a5a4b2 32.21%,
+      #bdb9c7 66.83%,
+      #efefef 84.13%,
+      #f6f0f4 100%
+    ),
+    #333;
+  --primary: #e35f8e;
+  --text: #ffffff;
+  --text-shadow: drop-shadow(0px 0px 2px rgba(0, 0, 0, 1))
+    drop-shadow(0px 0px 2px rgba(0, 0, 0, 0.5));
 }
 
 #app {
@@ -58,7 +69,10 @@ input:focus {
 .ctl-pressable {
   --tint: transparent;
   border: 2px solid rgba(26, 29, 45, 0.32);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.00) 70%, rgba(255, 255, 255, 0.30) 100%), linear-gradient(180deg, rgba(0, 0, 0, 0.00) 20%, rgba(0, 0, 0, 0.30) 80%), linear-gradient(0deg, var(--tint) 0%, var(--tint) 100%), rgba(0, 0, 0, 0.12);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0) 70%, rgba(255, 255, 255, 0.3) 100%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0) 20%, rgba(0, 0, 0, 0.3) 80%),
+    linear-gradient(0deg, var(--tint) 0%, var(--tint) 100%), rgba(0, 0, 0, 0.12);
   box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.5);
 }
 
@@ -87,21 +101,23 @@ input:focus {
 
 .ctl-button:active {
   filter: brightness(1.4);
-  transition: all 0s ease-out, transform 0.05s ease-out;
+  transition:
+    all 0s ease-out,
+    transform 0.05s ease-out;
   transform: scale(1.05);
 }
 
 .panel {
   border-radius: 20px;
-  border: 1px solid rgba(0, 0, 0, 0.30);
-  background: rgba(0, 0, 0, 0.50);
+  border: 1px solid rgba(0, 0, 0, 0.3);
+  background: rgba(0, 0, 0, 0.5);
 }
 
 ::-webkit-scrollbar {
   display: none;
 }
 
-input[type="range"]::-webkit-slider-thumb {
+input[type='range']::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
   width: 28px;
@@ -114,16 +130,16 @@ input[type="range"]::-webkit-slider-thumb {
   transition: all 0.2s ease;
 }
 
-input[type="range"]::-webkit-slider-thumb:hover {
+input[type='range']::-webkit-slider-thumb:hover {
   transform: scale(1.15);
   box-shadow: 0 0 20px rgba(227, 95, 142, 0.5);
 }
 
-input[type="range"]::-webkit-slider-thumb:active {
+input[type='range']::-webkit-slider-thumb:active {
   transform: scale(0.95);
 }
 
-input[type="range"]::-moz-range-thumb {
+input[type='range']::-moz-range-thumb {
   width: 28px;
   height: 28px;
   background: white;
@@ -134,13 +150,14 @@ input[type="range"]::-moz-range-thumb {
   transition: all 0.2s ease;
 }
 
-
 .select:focus {
   outline: none !important;
 }
 
 .ctl-container {
   border: 1px solid rgba(0, 0, 0, 0.54);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.00) 70%, #FFF 100%), linear-gradient(180deg, rgba(0, 0, 0, 0.00) 20%, rgba(0, 0, 0, 0.60) 80%), rgba(0, 0, 0, 0.30);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0) 70%, #fff 100%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0) 20%, rgba(0, 0, 0, 0.6) 80%), rgba(0, 0, 0, 0.3);
   background-blend-mode: overlay, overlay, normal;
 }

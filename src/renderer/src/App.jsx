@@ -2,15 +2,18 @@ import CtlToolbar from './components/CtlToolbar/CtlToolbar'
 import GalleryManager from './components/GalleryManager'
 import LayersEditor from './editors/LayersEditor'
 import ContentEditor from './editors/ContentEditor'
-import ContentPreview from './editors/ContentPreview'
-import { useState } from 'react'
-import { Airplay, ArrowLeft } from 'lucide-react'
+import ContentPreview, { ContentRenderer } from './editors/ContentPreview'
+import { useMemo, useRef, useState } from 'react'
+import { toPng } from 'html-to-image'
+import { Airplay, ArrowLeft, AtSignIcon, Mail, XIcon } from 'lucide-react'
 import { defaultState, symbolDefaultState, textDefaultState } from './utils/consts'
 import Alert from './effects/Alert'
 import { ErrorBoundary } from 'react-error-boundary'
 import { AnimatePresence, motion } from 'motion/react'
 import Button from './components/Button'
 import Typography from './components/Typography'
+import FormData from 'form-data'
+import Mailgun from 'mailgun.js'
 
 import doneSound from './assets/sounds/ctl_done.ogg'
 import upLight from './assets/img/up_light.png'
@@ -126,6 +129,68 @@ function App() {
     }, 100)
   }
 
+  const [emailPopupShown, setEmailPopupShown] = useState(false)
+
+  const emailPopup = () => {
+    setEmailPopupShown(true)
+  }
+
+  const closeEmailPopup = () => {
+    setEmailPopupShown(false)
+  }
+
+  const [emailSent, setEmailSent] = useState(false)
+
+  const [email, setEmail] = useState('')
+  const emailInputRef = useRef(null)
+  const [emailInputFocus, setEmailInputFocus] = useState(false)
+  const captureRef = useRef(null)
+  const [mailError, setMailError] = useState(null)
+
+  const sendEmail = async () => {
+    // check if mail is valid
+    const mailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!mailRegex.test(email)) {
+      setMailError("Email invalide. Assurez-vous d'avoir indiqué un email valide.")
+      return
+    }
+
+    const mailgun = new Mailgun(FormData)
+    const mg = mailgun.client({
+      username: 'api',
+      key: 'dd835a51f28fb48c03778236ee6975a3-42b8ce75-0de63f49',
+      // When you have an EU-domain, you must specify the endpoint:
+      url: 'https://api.eu.mailgun.net'
+    })
+    try {
+      let attachment = undefined
+      if (captureRef.current) {
+        // Wait a bit for images to load if needed, but usually they are preloaded.
+        // Also, might want to show a loading state in the UI.
+        const dataUrl = await toPng(captureRef.current, { cacheBust: true, pixelRatio: 1 })
+        const blob = await (await fetch(dataUrl)).blob()
+        attachment = new File([blob], 'logo.png', { type: 'image/png' })
+      }
+
+      const data = await mg.messages.create('compose-ton-logo.vincelinise.com', {
+        from: 'MMI IUT de Lannion <noreply@compose-ton-logo.vincelinise.com>',
+        to: [email],
+        subject: 'Compose ton logo - Votre logo est prêt !',
+        template: 'LogoReady',
+        attachment
+      })
+
+      console.log(data)
+      setEmailPopupShown(false)
+      setEmailSent(true)
+    } catch (error) {
+      console.log(error) //logs any error
+      setMailError(error.message)
+    }
+  }
+
+  const hasLogoBeenEdited = useMemo(() => document !== defaultState, [document])
+
   return (
     <ErrorBoundary
       fallbackRender={({ error }) => (
@@ -142,6 +207,17 @@ function App() {
       )}
     >
       <Alert
+        visible={mailError}
+        title="Impossible d'envoyer le mail"
+        message={mailError}
+        confirmText="OK"
+        onConfirm={() => {
+          setMailError(null)
+        }}
+        hideCancel
+      />
+
+      <Alert
         visible={resetConfirmVisible}
         title="Recommencer à zéro ?"
         message="Voulez-vous vraiment recommencer à partir du début ?"
@@ -157,6 +233,77 @@ function App() {
         confirmText="Recommencer"
         onCancel={() => setResetConfirmVisible(false)}
       />
+
+      <Alert
+        visible={emailSent}
+        title="E-mail envoyé !"
+        message="Vous avez reçu votre logo sur votre boîte mail !"
+        onConfirm={() => {
+          setEmailSent(false)
+        }}
+        confirmText="OK"
+        hideCancel
+      />
+
+      <AnimatePresence>
+        {emailPopupShown && (
+          <motion.div
+            className="fixed top-0 left-0 w-full h-full flex items-center justify-center"
+            style={{
+              backgroundColor: 'rgba(0, 0, 0, 0.5)',
+              zIndex: 99,
+              backdropFilter: 'blur(5px)'
+            }}
+            initial={{ opacity: 0, scale: 1.4 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 1.2 }}
+            transition={{ duration: 0.2 }}
+          >
+            <div className="p-10 rounded-3xl w-326 flex flex-col gap-4">
+              <p className="ts text-5xl text-center font-semibold">Recevoir le logo par e-mail</p>
+              <p className="ts text-3xl text-center mb-4">
+                Indiquez votre adresse e-mail pour recevoir le logo que vous venez de créer !
+              </p>
+
+              <div className="ctl-pressable ctl-bw px-6 rounded-2xl flex items-center gap-4">
+                <AtSignIcon size={28} strokeWidth={2.5} className="ts" />
+
+                <input
+                  ref={emailInputRef}
+                  type="text"
+                  placeholder="Votre adresse e-mail"
+                  className="ts color-white text-2xl font-medium py-4 w-full"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  onFocus={() => setEmailInputFocus(true)}
+                  onBlur={() => setEmailInputFocus(false)}
+                />
+
+                {email.length > 1 && (
+                  <XIcon size={32} strokeWidth={2.5} className="ts" onClick={() => setEmail('')} />
+                )}
+              </div>
+
+              <div className="flex flex-row items-center justify-center w-full gap-4 mt-2">
+                <Button onClick={() => setEmailPopupShown(false)}>
+                  <p className="ts text-3xl font-semibold">Annuler</p>
+                </Button>
+                <Button tint={'#0055FF'} onClick={() => sendEmail()}>
+                  <p className="ts text-3xl font-semibold">Recevoir un e-mail</p>
+                </Button>
+              </div>
+
+              {emailInputFocus && <div className="h-42" />}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <div style={{ position: 'absolute', top: -9999, left: -9999 }}>
+        <div ref={captureRef} style={{ width: 1000, height: 1000, backgroundColor: 'transparent' }}>
+          <ContentRenderer document={document} animated={false} simplified={false} />
+        </div>
+      </div>
 
       <motion.img
         src={upLight}
@@ -273,9 +420,15 @@ function App() {
                       Revenir à l’écran précédent
                     </Typography>
                   </Button>
+                  <Button tint="#0055FF" onClick={() => emailPopup()}>
+                    <Mail size={28} strokeWidth={2.5} className="ts" />
+                    <Typography className="font-semibold text-xl">Recevoir par e-mail</Typography>
+                  </Button>
                   <Button tint="#12C958" onClick={() => startSending()}>
                     <Airplay size={28} strokeWidth={2.5} className="ts" />
-                    <Typography className="font-semibold text-xl">Envoyer à l&apos;écran</Typography>
+                    <Typography className="font-semibold text-xl">
+                      Envoyer à l&apos;écran
+                    </Typography>
                   </Button>
                 </motion.div>
               )}
@@ -286,6 +439,7 @@ function App() {
       <AnimatePresence>
         {!aboutToSave && (
           <CtlToolbar
+            hasLogoBeenEdited={hasLogoBeenEdited}
             selectedTab={tab}
             setSelectedTab={(type) => {
               if (type === 'background') {

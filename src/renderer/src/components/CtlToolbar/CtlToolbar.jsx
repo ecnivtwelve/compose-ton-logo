@@ -5,7 +5,16 @@ import { motion } from 'motion/react'
 
 import './CtlToolbar.css'
 
-function CtlToolbar({ selectedTab, setSelectedTab, tabs, reset, done, quit, history }) {
+function CtlToolbar({
+  selectedTab,
+  setSelectedTab,
+  tabs,
+  reset,
+  done,
+  quit,
+  history,
+  hasLogoBeenEdited
+}) {
   return (
     <motion.div
       className="ctltoolbar flex gap-2 justify-between w-full px-10 py-6"
@@ -41,7 +50,15 @@ function CtlToolbar({ selectedTab, setSelectedTab, tabs, reset, done, quit, hist
         ))}
       </div>
       <div className="flex gap-4 w-full justify-end">
-        <Button tint="#12C958" onClick={done}>
+        <Button
+          tint={hasLogoBeenEdited && '#12C958'}
+          onClick={() => {
+            if (hasLogoBeenEdited) {
+              done()
+            }
+          }}
+          style={{ opacity: hasLogoBeenEdited ? 1 : 0.5 }}
+        >
           <CheckIcon size={28} strokeWidth={2.5} className="ts" />
           <Typography className="font-semibold text-xl">Terminer</Typography>
         </Button>
