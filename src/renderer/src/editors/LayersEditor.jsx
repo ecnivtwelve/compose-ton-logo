@@ -143,7 +143,7 @@ function LayerItem({ item, i, layer, setLayer, setTab, deleteLayer, documentLeng
         </div>
       )}
 
-      {isFixed && <div className="w-12" />}
+      {isFixed && <div className="w-10" />}
 
       <Button
         className="flex-1 min-w-0"

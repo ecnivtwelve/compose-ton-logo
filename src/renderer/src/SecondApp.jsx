@@ -137,7 +137,8 @@ function App() {
         alt=""
         style={{
           position: 'absolute',
-          zIndex: -99
+          zIndex: -99,
+          opacity: 0.5
         }}
         animate={{
           rotate: [0, 360],
@@ -147,7 +148,7 @@ function App() {
           duration: 40,
           ease: 'linear',
           repeat: Infinity,
-          repeatDelay: 1
+          repeatDelay: 0
         }}
       />
 

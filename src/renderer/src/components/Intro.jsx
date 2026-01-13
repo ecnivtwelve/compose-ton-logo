@@ -24,13 +24,13 @@ const Intro = ({ onEnd }) => {
     }, 3000)
     const t2 = setTimeout(() => {
       introVideoRef.current?.play()
-    }, 4500)
+    }, 2800)
     const t3 = setTimeout(() => {
       // setIsStartButtonVisible(true)
     }, 9000)
     const t4 = setTimeout(() => {
       onEnd()
-    }, 15000)
+    }, 16000)
 
     timeouts.current = [t1, t2, t3, t4]
   }
