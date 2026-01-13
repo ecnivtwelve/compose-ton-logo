@@ -34,27 +34,6 @@ export const tabs = [
 ]
 
 function App() {
-  const [document, setDocument] = useState(() =>
-    defaultState.map((s) => ({ ...s, id: Math.random().toString(36).substr(2, 9) }))
-  )
-  const [tab, setTab] = useState('text')
-
-  const [layer, setLayer] = useState(1)
-
-  const [resetConfirmVisible, setResetConfirmVisible] = useState(false)
-
-  const [aboutToSave, setAboutToSave] = useState(false)
-  const [sending, setSending] = useState(false)
-
-  const startSending = () => {
-    setSending(false)
-    setTimeout(() => {
-      const doneAudio = new Audio(doneSound)
-      doneAudio.play()
-      setSending(true)
-    }, 100)
-  }
-
   return (
     <ErrorBoundary
       fallbackRender={({ error, resetErrorBoundary }) => (
