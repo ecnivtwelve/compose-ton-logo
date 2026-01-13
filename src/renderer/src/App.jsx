@@ -52,6 +52,16 @@ function App() {
       const doneAudio = new Audio(doneSound)
       doneAudio.play()
       setSending(true)
+
+      const serializableDoc = document.map((layer) => {
+        if (layer.type === 'symbols' && layer.symbol) {
+          // eslint-disable-next-line no-unused-vars
+          const { svg, ...restSymbol } = layer.symbol
+          return { ...layer, symbol: restSymbol }
+        }
+        return layer
+      })
+      window.electron.ipcRenderer.send('send-logo', serializableDoc)
     }, 100)
   }
 

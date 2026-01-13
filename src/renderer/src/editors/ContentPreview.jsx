@@ -66,7 +66,7 @@ function ContentPreview({ document }) {
   )
 }
 
-function ContentRenderer({ document }) {
+export function ContentRenderer({ document, animated = true }) {
   console.log(document)
   return (
     <>
@@ -98,9 +98,9 @@ function ContentRenderer({ document }) {
                   >
                     <AnimatePresence>
                       <motion.div
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        transition={{ type: 'spring', bounce: 0.7, duration: 0.7 }}
+                        initial={animated && { scale: 0 }}
+                        animate={animated && { scale: 1 }}
+                        transition={animated && { type: 'spring', bounce: 0.7, duration: 0.7 }}
                         key={layer.font}
                       >
                         <p
@@ -138,9 +138,9 @@ function ContentRenderer({ document }) {
                   >
                     <AnimatePresence>
                       <motion.div
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        transition={{ type: 'spring', bounce: 0.7, duration: 0.7 }}
+                        initial={animated && { scale: 0 }}
+                        animate={animated && { scale: 1 }}
+                        transition={animated && { type: 'spring', bounce: 0.7, duration: 0.7 }}
                         key={layer.symbol.name}
                       >
                         <Icon

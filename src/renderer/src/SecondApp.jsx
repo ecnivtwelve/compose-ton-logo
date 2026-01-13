@@ -1,46 +1,58 @@
-import CtlToolbar from './components/CtlToolbar/CtlToolbar'
-import LayersEditor from './editors/LayersEditor'
-import ContentEditor from './editors/ContentEditor'
-import ContentPreview from './editors/ContentPreview'
-import { useState } from 'react'
-import { Airplay, ArrowLeft, ImagesIcon, ShapesIcon, TypeIcon } from 'lucide-react'
-import { defaultState, symbolDefaultState, textDefaultState } from './utils/consts'
+import ContentPreview, { ContentRenderer } from './editors/ContentPreview'
+import { useState, useEffect } from 'react'
+import { symbols } from './utils/symbols'
 import Alert from './effects/Alert'
 import { ErrorBoundary } from 'react-error-boundary'
 import { AnimatePresence, motion } from 'motion/react'
-import Button from './components/Button'
-import Typography from './components/Typography'
-
-import doneSound from './assets/sounds/ctl_done.ogg'
-import upLight from './assets/img/up_light.png'
-import Intro from './components/Intro'
-
-export const tabs = [
-  {
-    key: 'text',
-    title: 'Texte',
-    icon: <TypeIcon size={28} strokeWidth={2.5} className="ts" />
-  },
-  {
-    key: 'symbols',
-    title: 'Symboles',
-    icon: <ShapesIcon size={28} strokeWidth={2.5} className="ts" />
-  },
-  {
-    key: 'background',
-    title: 'Arrière-plan',
-    icon: <ImagesIcon size={28} strokeWidth={2.5} className="ts" />
-  }
-]
+import downLight from './assets/img/down_light.png'
 
 function App() {
+  const [logoGallery, setLogoGallery] = useState([])
+  const [logoData, setLogoData] = useState(null)
+  const [currentLogoIncrement, setCurrentLogoIncrement] = useState(0)
+
+  useEffect(() => {
+    console.log('SecondApp mounted, setting up IPC listener')
+    const handleDisplayLogo = (_, receivedDoc) => {
+      console.log('SecondApp received display-logo event', receivedDoc)
+      const hydratedDoc = receivedDoc.map((layer) => {
+        if (layer.type === 'symbols' && layer.symbol) {
+          // Find the symbol by name across all categories
+          for (const category of symbols) {
+            const foundSymbol = category.symbols.find((s) => s.name === layer.symbol.name)
+            if (foundSymbol) {
+              return { ...layer, symbol: { ...layer.symbol, svg: foundSymbol.svg } }
+            }
+          }
+        }
+        return layer
+      })
+      setLogoData(hydratedDoc)
+      setLogoGallery([...logoGallery, hydratedDoc])
+      setCurrentLogoIncrement((prev) => prev + 1)
+    }
+
+    if (window.electron && window.electron.ipcRenderer) {
+      console.log('IPC Renderer found in SecondApp')
+      window.electron.ipcRenderer.on('display-logo', handleDisplayLogo)
+    } else {
+      console.error('IPC Renderer NOT found in SecondApp')
+    }
+
+    return () => {
+      if (window.electron && window.electron.ipcRenderer) {
+        window.electron.ipcRenderer.removeAllListeners('display-logo')
+      }
+    }
+  }, [])
+
   return (
     <ErrorBoundary
-      fallbackRender={({ error, resetErrorBoundary }) => (
+      fallbackRender={({ error }) => (
         <Alert
           visible={true}
           title="Quelque chose s'est mal passé !"
-          message={`Une erreur est survenue et Compose Ton Logo à planté. Veuillez relancer l'application. \n \n (Erreur : ${error.message})`}
+          message={`Une erreur est survenue dans la seconde fenêtre. \n \n (Erreur : ${error.message})`}
           confirmText="Quitter"
           onConfirm={() => {
             window.electron.ipcRenderer.send('quit-app')
@@ -49,6 +61,51 @@ function App() {
         />
       )}
     >
+      <motion.img
+        src={downLight}
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          objectFit: 'cover',
+          zIndex: 99
+        }}
+        animate={{ opacity: [0, 0, 1, 0] }}
+        transition={{
+          duration: 2,
+          ease: 'easeInOut',
+          times: [0, 0.4, 0.98, 1]
+        }}
+        key={currentLogoIncrement}
+      />
+
+      <div className="w-full h-full flex align-center justify-center">
+        <AnimatePresence>
+          {logoData && (
+            <motion.div
+              style={{
+                width: '100%',
+                height: '100%',
+                overflow: 'hidden',
+                position: 'absolute',
+                zIndex: 9999,
+                filter: 'drop-shadow(0px 0px 100px rgba(0, 0, 0, 0.5))'
+              }}
+              initial={{ y: 1000, scale: 0.8 }}
+              animate={{
+                y: 0,
+                scale: 1.3,
+                transition: { type: 'spring', duration: 1, delay: 1.5, bounce: 0.3 }
+              }}
+              key={currentLogoIncrement}
+            >
+              <ContentRenderer document={logoData} animated={false} />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     </ErrorBoundary>
   )
 }

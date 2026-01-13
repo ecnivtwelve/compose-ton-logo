@@ -148,6 +148,20 @@ function createSecondWindow() {
   }
 }
 
+ipcMain.on('send-logo', (event, logoData) => {
+  console.log('Main process received send-logo event')
+  const windows = BrowserWindow.getAllWindows()
+  console.log(`Found ${windows.length} windows`)
+  windows.forEach((win) => {
+    if (win.webContents.id !== event.sender.id) {
+      console.log(`Sending display-logo to window with ID: ${win.id}`)
+      win.webContents.send('display-logo', logoData)
+    } else {
+      console.log(`Skipping sender window ID: ${win.id}`)
+    }
+  })
+})
+
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
 // explicitly with Cmd + Q.
