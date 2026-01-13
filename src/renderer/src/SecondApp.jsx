@@ -5,6 +5,7 @@ import Alert from './effects/Alert'
 import { ErrorBoundary } from 'react-error-boundary'
 import { AnimatePresence, motion } from 'motion/react'
 import downLight from './assets/img/down_light.png'
+import overlay from './assets/img/projo_overlay.png'
 import LogoGallery from './components/LogoGallery'
 
 function App() {
@@ -78,6 +79,19 @@ function App() {
       )}
     >
       <LogoGallery logos={logoGallery} />
+
+      <motion.img
+        src={overlay}
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          objectFit: 'cover',
+          zIndex: 99999
+        }}
+      />
 
       {logoData && (
         <motion.img

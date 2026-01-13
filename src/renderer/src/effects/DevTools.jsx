@@ -20,21 +20,22 @@ function DevTools() {
           top: 0px;
           right: 0px;
           color: white;
-          padding: 10px;
+          padding: 6px;
           border-radius: 0px;
           z-index: 100000;
+          opacity: 0.5;
         }
 
         .dev-tools button {
           background: none;
           color: white;
           border: 1px solid white;
-          padding: 8px 12px;
-          margin: 0 5px;
+          padding: 5px 8px;
+          margin: 0 3px;
           border-radius: 0px;
           cursor: pointer;
           filter: drop-shadow(0px 0px 1px rgba(0, 0, 0, 1)) drop-shadow(0px 0px 1px rgba(0, 0, 0, 1));
-          font-size: 14px;
+          font-size: 10px;
           letter-spacing: 0.2px;
         }
       `}

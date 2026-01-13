@@ -75,7 +75,8 @@ export function ContentRenderer({ document, animated = true, simplified = false 
           // mask all borders
           maskImage: !simplified
             ? 'linear-gradient(0deg, rgba(255, 255, 255, 0.00) 0%, #FFF 10%, #FFF 90%, rgba(255, 255, 255, 0.00) 100%)'
-            : 'none'
+            : 'none',
+          maxWidth: 500
         }}
       >
         <div
@@ -89,80 +90,93 @@ export function ContentRenderer({ document, animated = true, simplified = false 
         >
           {document.map((layer) => {
             if (layer.type == 'text') {
+              const textElement = (
+                <p
+                  style={{
+                    fontFamily: layer.font ?? '',
+                    color: layer.textColor ?? '#fff',
+                    fontSize: layer.size ? `${layer.size}px` : '48px',
+                    filter: !simplified
+                      ? `drop-shadow(0px 0px ${layer.shadow}px rgba(0, 0, 0, 0.8))`
+                      : 'none',
+                    letterSpacing: `${layer.letterSpacing / 1000}em`,
+                    maxWidth: '100%',
+                    whiteSpace: 'pre-wrap',
+                    wordBreak: 'break-word',
+                    textAlign: 'center',
+                    WebkitTextStrokeWidth: `${layer.border}px`,
+                    WebkitTextStrokeColor: '#000',
+                    lineHeight: layer.size ? `${layer.size}px` : '48px'
+                  }}
+                >
+                  {layer.content}
+                </p>
+              )
+
               return (
-                <React.Fragment key={layer.id}>
-                  <div
-                    style={{
-                      position: 'absolute',
-                      transform: `scaleX(${layer.width / 100}) rotate(${layer.rotation ?? 0}deg) translateX(${layer.x ?? 0}px) translateY(${layer.y ?? 0}px)`
-                    }}
-                  >
-                    <AnimatePresence>
+                <div
+                  key={layer.id}
+                  style={{
+                    position: 'absolute',
+                    transform: `scaleX(${layer.width / 100}) rotate(${layer.rotation ?? 0}deg) translateX(${layer.x ?? 0}px) translateY(${layer.y ?? 0}px)`
+                  }}
+                >
+                  {animated ? (
+                    <AnimatePresence mode="wait">
                       <motion.div
-                        initial={animated && { scale: 0 }}
-                        animate={animated && { scale: 1 }}
-                        transition={animated && { type: 'spring', bounce: 0.7, duration: 0.7 }}
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{ type: 'spring', bounce: 0.7, duration: 0.7 }}
                         key={layer.font}
                       >
-                        <p
-                          style={{
-                            fontFamily: layer.font ?? '',
-                            color: layer.textColor ?? '#fff',
-                            fontSize: layer.size ? `${layer.size}px` : '48px',
-                            filter: !simplified
-                              ? `drop-shadow(0px 0px ${layer.shadow}px rgba(0, 0, 0, 0.8))`
-                              : 'none',
-                            letterSpacing: `${layer.letterSpacing / 1000}em`,
-                            maxWidth: '100%',
-                            whiteSpace: 'pre-wrap',
-                            wordBreak: 'break-word',
-                            textAlign: 'center',
-                            WebkitTextStrokeWidth: `${layer.border}px`,
-                            WebkitTextStrokeColor: '#000',
-                            lineHeight: layer.size ? `${layer.size}px` : '48px'
-                          }}
-                        >
-                          {layer.content}
-                        </p>
+                        {textElement}
                       </motion.div>
                     </AnimatePresence>
-                  </div>
-                </React.Fragment>
+                  ) : (
+                    textElement
+                  )}
+                </div>
               )
             } else if (layer.type == 'symbols') {
               const Icon = layer.symbol.svg
+              const iconElement = (
+                <Icon
+                  width={layer.size}
+                  height={layer.size}
+                  fill={layer.color}
+                  strokeWidth={layer.border / 10}
+                  stroke="#000"
+                  style={{
+                    filter: !simplified
+                      ? `drop-shadow(0px 0px ${layer.shadow}px rgba(0, 0, 0, 0.8))`
+                      : 'none',
+                    overflow: 'visible'
+                  }}
+                />
+              )
               return (
-                <React.Fragment key={layer.id}>
-                  <div
-                    style={{
-                      transform: `rotate(${layer.rotation ?? 0}deg) translateX(${layer.x ?? 0}px) translateY(${layer.y ?? 0}px)`,
-                      position: 'absolute'
-                    }}
-                  >
-                    <AnimatePresence>
+                <div
+                  key={layer.id}
+                  style={{
+                    transform: `rotate(${layer.rotation ?? 0}deg) translateX(${layer.x ?? 0}px) translateY(${layer.y ?? 0}px)`,
+                    position: 'absolute'
+                  }}
+                >
+                  {animated ? (
+                    <AnimatePresence mode="wait">
                       <motion.div
-                        initial={animated && { scale: 0 }}
-                        animate={animated && { scale: 1 }}
-                        transition={animated && { type: 'spring', bounce: 0.7, duration: 0.7 }}
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{ type: 'spring', bounce: 0.7, duration: 0.7 }}
                         key={layer.symbol.name}
                       >
-                        <Icon
-                          width={layer.size}
-                          height={layer.size}
-                          fill={layer.color}
-                          strokeWidth={layer.border / 10}
-                          stroke="#000"
-                          style={{
-                            filter: !simplified
-                              ? `drop-shadow(0px 0px ${layer.shadow}px rgba(0, 0, 0, 0.8))`
-                              : 'none',
-                            overflow: 'visible'
-                          }}
-                        />
+                        {iconElement}
                       </motion.div>
                     </AnimatePresence>
-                  </div>
-                </React.Fragment>
+                  ) : (
+                    iconElement
+                  )}
+                </div>
               )
             } else if (layer.type == 'background') {
               const pattern = allPatterns[layer.pattern]
@@ -180,9 +194,14 @@ export function ContentRenderer({ document, animated = true, simplified = false 
                       overflow: 'hidden'
                     }}
                   >
-                    {layer.pattern && <img src={pattern.default} style={{
-                      opacity: layer.patternOpacity / 100
-                    }} />}
+                    {layer.pattern && (
+                      <img
+                        src={pattern.default}
+                        style={{
+                          opacity: layer.patternOpacity / 100
+                        }}
+                      />
+                    )}
                   </div>
                 </React.Fragment>
               )

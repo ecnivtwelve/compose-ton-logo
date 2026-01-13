@@ -22,13 +22,6 @@ function createWindow() {
     mainWindow.show()
   })
 
-  mainWindow.webContents.on('before-input-event', (event, input) => {
-    if (input.key === 'F11') {
-      mainWindow.setFullScreen(!mainWindow.isFullScreen())
-      event.preventDefault()
-    }
-  })
-
   mainWindow.webContents.setWindowOpenHandler((details) => {
     shell.openExternal(details.url)
     return { action: 'deny' }
@@ -57,16 +50,15 @@ app.whenReady().then(() => {
     optimizer.watchWindowShortcuts(window)
   })
 
-  // IPC test
+  // IPC handlers
   ipcMain.on('ping', () => console.log('pong'))
 
   ipcMain.on('open-devtools', (event) => {
-    const webContents = event.sender
-    webContents.openDevTools()
+    event.sender.openDevTools()
   })
 
   ipcMain.on('toggle-fullscreen', (event) => {
-    const win = BrowserWindow.fromWebContents(event.sender)
+    const win = event.sender.getOwnerBrowserWindow()
     if (win) {
       win.setFullScreen(!win.isFullScreen())
     }
@@ -81,20 +73,14 @@ app.whenReady().then(() => {
 
   ipcMain.on('message-from-second', (event, arg) => {
     console.log(arg)
-    // Optionally reply
-    event.reply('message', 'Pong from Main')
     // Optionally forward to main window
-    const mainWindow = BrowserWindow.getAllWindows().find(
-      (w) => w !== event.sender.getOwnerBrowserWindow()
-    )
-    if (mainWindow) {
-      mainWindow.webContents.send('message', `Second window says: ${arg}`)
+    const otherWindow = BrowserWindow.getAllWindows().find((w) => w.webContents !== event.sender)
+    if (otherWindow) {
+      otherWindow.webContents.send('message', `Other window says: ${arg}`)
     }
   })
 
   app.on('activate', function () {
-    // On macOS it's common to re-create a window in the app when the
-    // dock icon is clicked and there are no other windows open.
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow()
       createSecondWindow()
@@ -107,6 +93,7 @@ function createSecondWindow() {
     width: 1600,
     height: 900,
     fullscreen: false,
+    fullscreenable: true,
     show: false,
     autoHideMenuBar: true,
     ...(process.platform === 'linux' ? { icon } : {}),
@@ -118,22 +105,6 @@ function createSecondWindow() {
 
   secondWindow.on('ready-to-show', () => {
     secondWindow.show()
-  })
-
-  secondWindow.webContents.on('before-input-event', (event, input) => {
-    if (input.key === 'F11') {
-      secondWindow.setFullScreen(!secondWindow.isFullScreen())
-      event.preventDefault()
-    }
-  })
-
-  secondWindow.on('open-devtools', (event) => {
-    const webContents = event.sender
-    webContents.openDevTools()
-  })
-
-  secondWindow.on('quit-app', () => {
-    app.quit()
   })
 
   secondWindow.webContents.setWindowOpenHandler((details) => {

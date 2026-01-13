@@ -147,7 +147,12 @@ function App() {
           )}
         </AnimatePresence>
 
-        <div className="w-full" />
+        <div
+          className="w-[680px]"
+          style={{
+            minWidth: 680
+          }}
+        />
 
         <motion.div
           style={{

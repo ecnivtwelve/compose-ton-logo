@@ -14,7 +14,7 @@ const Button = ({ children, tint, onClick, ...extraProps }) => {
     <div
       {...extraProps}
       className={'ctl-pressable ctl-button ' + extraProps.className}
-      style={{ '--tint': tint }}
+      style={{ '--tint': tint, ...extraProps.style }}
       onClick={handlePress}
       onPointerUp={playButtonSound}
     >
