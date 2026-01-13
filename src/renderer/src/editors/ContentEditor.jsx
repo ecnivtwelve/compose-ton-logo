@@ -60,7 +60,14 @@ function ContentEditor({ document, setDocument, layer, tab }) {
 
   return (
     <>
-      <div ref={scrollRef} className="panel w-full h-full overflow-scroll relative">
+      <motion.div
+        ref={scrollRef}
+        className="panel w-full h-full overflow-scroll relative"
+        initial={{ opacity: 0, x: -200 }}
+        animate={{ opacity: 1, x: 0 }}
+        exit={{ opacity: 0, x: -600 }}
+        transition={{ duration: 0.4, delay: 0.05, ease: [0.3, 0, 0, 1] }}
+      >
         <AnimatePresence mode="wait">
           <motion.div
             key={document[layer].type}
@@ -96,7 +103,7 @@ function ContentEditor({ document, setDocument, layer, tab }) {
             )}
           </motion.div>
         </AnimatePresence>
-      </div>
+      </motion.div>
     </>
   )
 }

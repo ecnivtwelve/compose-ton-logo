@@ -4,6 +4,7 @@ import { symbolDefaultState, textDefaultState } from '../utils/consts'
 import { tabs } from '../App'
 import Button from '../components/Button'
 import { Reorder, useDragControls } from 'motion/react'
+import { AnimatePresence, motion } from 'motion/react'
 
 import { useRef, useEffect } from 'react'
 
@@ -57,7 +58,13 @@ function LayersEditor({ document, setDocument, layer, setLayer, tab, setTab }) {
 
   return (
     <>
-      <div className="panel w-256 h-[calc(100% - 34px)] mt-[34px] flex flex-col items-center">
+      <motion.div
+        className="panel w-256 h-[calc(100% - 34px)] mt-[34px] flex flex-col items-center"
+        initial={{ opacity: 0, x: -200 }}
+        animate={{ opacity: 1, x: 0 }}
+        exit={{ opacity: 0, x: -600 }}
+        transition={{ duration: 0.4, ease: [0.3, 0, 0, 1] }}
+      >
         <img src={logo} alt="" className="mt-[-50px] h-22 ts" />
 
         <div
@@ -111,7 +118,7 @@ function LayersEditor({ document, setDocument, layer, setLayer, tab, setTab }) {
             </Button>
           )}
         </div>
-      </div>
+      </motion.div>
     </>
   )
 }
