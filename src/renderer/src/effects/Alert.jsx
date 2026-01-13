@@ -12,6 +12,7 @@ function Alert({
   onCancel,
   confirmText = 'Supprimer',
   confirmTint = '#C52E2E',
+  cancelTint = null,
   cancelText = 'Annuler',
   hideCancel = false
 }) {
@@ -41,7 +42,7 @@ function Alert({
 
             <div className="flex flex-row items-center justify-center w-full gap-4 mt-2">
               {!hideCancel && (
-                <Button onClick={onCancel}>
+                <Button tint={cancelTint} onClick={onCancel}>
                   <p className="ts text-3xl font-semibold">{cancelText}</p>
                 </Button>
               )}

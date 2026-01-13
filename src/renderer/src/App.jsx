@@ -191,6 +191,22 @@ function App() {
 
   const hasLogoBeenEdited = useMemo(() => document !== defaultState, [document])
 
+  const resetLogo = () => {
+    setDocument(defaultState.map((s) => ({ ...s, id: Math.random().toString(36).substr(2, 9) })))
+    setLayer(1)
+    setCurrentLogoId(null)
+    setAboutToSave(false)
+    setResetConfirmVisible(false)
+  }
+
+  const [editingMode, setEditingMode] = useState(false)
+  const [inactivityAlertVisible, setInactivityAlertVisible] = useState(false)
+  const [inactivityCount, setInactivityCount] = useState(10)
+
+  if (!editingMode) {
+    return <div className="w-full h-full bg-red-300" onClick={() => setEditingMode(true)}></div>
+  }
+
   return (
     <ErrorBoundary
       fallbackRender={({ error }) => (
@@ -207,6 +223,27 @@ function App() {
       )}
     >
       <Alert
+        visible={false}
+        title="Es-tu encore là ?"
+        message="Tu es inactif depuis un moment. Veux-tu continuer à composer ton logo ?"
+        cancelText={`Supprimer (${inactivityCount})`}
+        confirmText="Oui, je suis encore là"
+        cancelTint="#C52E2E"
+        confirmTint="#12C958"
+        onConfirm={() => {
+          setInactivityAlertVisible(false)
+          setInactivityCount(10)
+          setMailError(null)
+        }}
+        onCancel={() => {
+          setInactivityAlertVisible(false)
+          setInactivityCount(10)
+          setEditingMode(false)
+          resetLogo()
+        }}
+      />
+
+      <Alert
         visible={mailError}
         title="Impossible d'envoyer le mail"
         message={mailError}
@@ -222,13 +259,7 @@ function App() {
         title="Recommencer à zéro ?"
         message="Voulez-vous vraiment recommencer à partir du début ?"
         onConfirm={() => {
-          setDocument(
-            defaultState.map((s) => ({ ...s, id: Math.random().toString(36).substr(2, 9) }))
-          )
-          setLayer(1)
-          setCurrentLogoId(null)
-          setAboutToSave(false)
-          setResetConfirmVisible(false)
+          resetLogo()
         }}
         confirmText="Recommencer"
         onCancel={() => setResetConfirmVisible(false)}
