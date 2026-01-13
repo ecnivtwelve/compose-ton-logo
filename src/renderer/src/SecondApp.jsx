@@ -13,8 +13,9 @@ function App() {
   const [currentLogoIncrement, setCurrentLogoIncrement] = useState(0)
 
   const addToLogoGallery = (logo) => {
-    setLogoGallery((prev) => [...prev, logo])
-    console.log(logoGallery)
+    setTimeout(() => {
+      setLogoGallery((prev) => [...prev, logo])
+    }, 3000)
   }
 
   useEffect(() => {
@@ -52,6 +53,15 @@ function App() {
     }
   }, [])
 
+  useEffect(() => {
+    if (logoData) {
+      const timer = setTimeout(() => {
+        setLogoData(null)
+      }, 10000)
+      return () => clearTimeout(timer)
+    }
+  }, [logoData, currentLogoIncrement])
+
   return (
     <ErrorBoundary
       fallbackRender={({ error }) => (
@@ -68,25 +78,28 @@ function App() {
       )}
     >
       <LogoGallery logos={logoGallery} />
-      <motion.img
-        src={downLight}
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          objectFit: 'cover',
-          zIndex: 99
-        }}
-        animate={{ opacity: [0, 0, 1, 0] }}
-        transition={{
-          duration: 2,
-          ease: 'easeInOut',
-          times: [0, 0.4, 0.98, 1]
-        }}
-        key={currentLogoIncrement}
-      />
+
+      {logoData && (
+        <motion.img
+          src={downLight}
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            objectFit: 'cover',
+            zIndex: 99
+          }}
+          animate={{ opacity: [0, 0, 1, 0] }}
+          transition={{
+            duration: 2,
+            ease: 'easeInOut',
+            times: [0, 0.4, 0.98, 1]
+          }}
+          key={currentLogoIncrement}
+        />
+      )}
 
       <div className="w-full h-full flex align-center justify-center">
         <AnimatePresence>
@@ -97,14 +110,23 @@ function App() {
                 height: '100%',
                 overflow: 'hidden',
                 position: 'absolute',
-                zIndex: 9999,
-                filter: 'drop-shadow(0px 0px 100px rgba(0, 0, 0, 0.5))'
+                filter: 'drop-shadow(0px 0px 100px rgba(0, 0, 0, 0.5))',
+                zIndex: 9999
               }}
-              initial={{ y: 1000, scale: 0.8 }}
+              initial={{
+                y: 1000,
+                scale: 0.8
+              }}
               animate={{
                 y: 0,
+                opacity: 1,
                 scale: 1.3,
                 transition: { type: 'spring', duration: 1, delay: 1.5, bounce: 0.3 }
+              }}
+              exit={{
+                opacity: 0,
+                scale: 2,
+                transition: { duration: 1, ease: 'easeInOut' }
               }}
               key={currentLogoIncrement}
             >

@@ -11,11 +11,9 @@ function LogoItem({ logo }) {
         margin: '20px',
         flexShrink: 0,
         borderRadius: '20px',
-        background: 'white',
-        boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
-        overflow: 'hidden',
+        overflow: 'visible',
         position: 'relative',
-        scale: 0.8
+        scale: 1.6
       }}
     >
       <div
@@ -64,7 +62,7 @@ function MarqueeRow({ logos, direction = 1, speed = 1 }) {
   const renderLogos = [...logos, ...logos, ...logos, ...logos]
 
   return (
-    <div style={{ overflow: 'hidden', display: 'flex', width: '100%' }}>
+    <div style={{ overflow: 'visible', display: 'flex', width: '100%' }}>
       <motion.div style={{ x, display: 'flex' }}>
         {renderLogos.map((logo, i) => (
           <LogoItem key={i} logo={logo} />
@@ -110,12 +108,11 @@ export default function LogoGallery({ logos }) {
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
-        gap: '20px',
-        opacity: 0.3,
+        gap: '0px',
+        opacity: 0.7,
         zIndex: 0,
         overflow: 'hidden',
         pointerEvents: 'none',
-        background: '#f5f5f5' // light gray background for better contrast
       }}
     >
       <MarqueeRow logos={displayLogos} speed={0.5} direction={-1} />
