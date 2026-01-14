@@ -11,6 +11,10 @@ function DevTools() {
     window.electron.ipcRenderer.send('quit-app')
   }
 
+  const handleReset = () => {
+    window.electron.ipcRenderer.send('relaunch-app')
+  }
+
   return (
     <>
       <style>
@@ -44,6 +48,7 @@ function DevTools() {
       <div className="dev-tools">
         <button onClick={toggleFullscreen}>Toggle fullscreen</button>
         <button onClick={handleDebug}>Debug</button>
+        <button onClick={handleReset}>Reset App</button>
         <button onClick={handleQuit}>Quitter</button>
       </div>
     </>

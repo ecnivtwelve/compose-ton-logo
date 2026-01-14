@@ -240,7 +240,7 @@ function TextEditor({ content, setLayer }) {
               <p className="ts text-xl font-semibold w-56">Taille de police</p>
               <Slider
                 value={content.size ?? 64}
-                range={[32, 256]}
+                range={[32, 420]}
                 unit={'px'}
                 defaultValue={textDefaultState.size}
                 onChange={(size) => setLayer({ ...content, size })}

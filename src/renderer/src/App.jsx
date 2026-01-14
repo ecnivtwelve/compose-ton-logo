@@ -23,6 +23,8 @@ import upLight from './assets/img/up_light.png'
 
 import { tabs } from './utils/tabs'
 
+import packageJson from '../../../package.json'
+
 function App() {
   const [document, setDocument] = useState(() =>
     defaultState.map((s) => ({ ...s, id: Math.random().toString(36).substr(2, 9) }))
@@ -192,7 +194,14 @@ function App() {
     }
   }
 
-  const hasLogoBeenEdited = useMemo(() => document !== defaultState, [document])
+  const hasLogoBeenEdited = useMemo(() => {
+    const currentContent = document.map((layer) => {
+      // eslint-disable-next-line no-unused-vars
+      const { id, ...rest } = layer
+      return rest
+    })
+    return JSON.stringify(currentContent) !== JSON.stringify(defaultState)
+  }, [document])
 
   const resetLogo = () => {
     setDocument(defaultState.map((s) => ({ ...s, id: Math.random().toString(36).substr(2, 9) })))
@@ -283,13 +292,25 @@ function App() {
         <Typography
           style={{
             position: 'absolute',
+            zIndex: 3,
+            left: 20,
+            bottom: 20
+          }}
+          className="font-regular text-md"
+        >
+          Version {packageJson.version}
+        </Typography>
+
+        <Typography
+          style={{
+            position: 'absolute',
             zIndex: 2,
             bottom: 40,
             textAlign: 'center'
           }}
           className="font-regular text-md"
         >
-          <span className='font-semibold'>© 2025 IUT de Lannion — Département MMI — SAÉ 3.ALT</span>
+          <span className="font-semibold">© 2025 IUT de Lannion — Département MMI — SAÉ 3.ALT</span>
           <br />
           Roxane OMNES et Vince LINISE
         </Typography>
@@ -331,7 +352,7 @@ function App() {
             duration: 25,
             ease: 'linear',
             repeat: Infinity,
-            repeatDelay: 1
+            repeatDelay: 0
           }}
         />
       </div>

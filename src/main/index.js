@@ -68,6 +68,12 @@ app.whenReady().then(() => {
     app.quit()
   })
 
+  ipcMain.on('relaunch-app', () => {
+    BrowserWindow.getAllWindows().forEach((win) => win.close())
+    createWindow()
+    createSecondWindow()
+  })
+
   createWindow()
   createSecondWindow()
 

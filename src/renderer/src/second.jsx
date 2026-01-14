@@ -14,7 +14,6 @@ createRoot(document.getElementById('root')).render(
     <ScaleContainer>
       <SecondApp />
       <ClickEffect />
-      <DevTools />
       <Keyboard />
     </ScaleContainer>
   </StrictMode>
