@@ -34,6 +34,7 @@ function App() {
   const [layer, setLayer] = useState(1)
 
   const [resetConfirmVisible, setResetConfirmVisible] = useState(false)
+  const [quitConfirmVisible, setQuitConfirmVisible] = useState(false)
 
   const [aboutToSave, setAboutToSave] = useState(false)
   const [sending, setSending] = useState(false)
@@ -206,6 +207,7 @@ function App() {
   const resetLogo = () => {
     setDocument(defaultState.map((s) => ({ ...s, id: Math.random().toString(36).substr(2, 9) })))
     setLayer(1)
+    setTab('text')
     setCurrentLogoId(null)
     setAboutToSave(false)
     setResetConfirmVisible(false)
@@ -214,6 +216,11 @@ function App() {
   const [editingMode, setEditingMode] = useState(false)
   const [inactivityAlertVisible, setInactivityAlertVisible] = useState(false)
   const [inactivityCount, setInactivityCount] = useState(10)
+
+  const startEditing = () => {
+    resetLogo()
+    setEditingMode(true)
+  }
 
   const inactivityTimerRef = useRef(null)
   const resetLogoRef = useRef(resetLogo)
@@ -270,15 +277,21 @@ function App() {
     return () => clearInterval(timer)
   }, [inactivityAlertVisible])
 
+  const quitLogo = () => {
+    resetLogo()
+    setEditingMode(false)
+    setQuitConfirmVisible(false)
+  }
+
   if (!editingMode) {
     return (
       <div
         className="w-full h-full flex items-center justify-center bg-black"
-        onClick={() => setEditingMode(true)}
+        onClick={() => startEditing()}
       >
         <Button
           tint="#12C958"
-          onClick={() => setEditingMode(true)}
+          onClick={() => startEditing()}
           style={{
             position: 'absolute',
             zIndex: 2,
@@ -415,6 +428,19 @@ function App() {
         }}
         confirmText="Recommencer"
         onCancel={() => setResetConfirmVisible(false)}
+      />
+
+
+
+      <Alert
+        visible={quitConfirmVisible}
+        title="Quitter la création du logo ?"
+        message="Voulez-vous vraiment quitter la création du logo ? Votre travail sera perdu."
+        onConfirm={() => {
+          quitLogo()
+        }}
+        confirmText="Quitter"
+        onCancel={() => setQuitConfirmVisible(false)}
       />
 
       <Alert
@@ -657,8 +683,7 @@ function App() {
             }}
             tabs={tabs}
             quit={() => {
-              resetLogo()
-              setEditingMode(false)
+              setQuitConfirmVisible(true)
             }}
             reset={() => setResetConfirmVisible(true)}
             done={() => setAboutToSave(true)}

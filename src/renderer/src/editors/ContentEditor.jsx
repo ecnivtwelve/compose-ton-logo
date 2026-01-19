@@ -1,4 +1,4 @@
-import { CheckIcon, MinusIcon, SearchIcon, TypeIcon, XIcon } from 'lucide-react'
+import { ArrowDown, CheckIcon, ChevronDown, MinusIcon, SearchIcon, TypeIcon, XIcon } from 'lucide-react'
 import { motion, AnimatePresence } from 'motion/react'
 import { useEffect, useState, useRef } from 'react'
 
@@ -182,9 +182,9 @@ function TextEditor({ content, setLayer }) {
         style={
           content.content.length <= 0
             ? {
-                opacity: 0.5,
-                filter: 'blur(2px)'
-              }
+              opacity: 0.5,
+              filter: 'blur(2px)'
+            }
             : {}
         }
         onClick={content.content.length <= 0 ? haveToFillError : undefined}
@@ -386,6 +386,39 @@ function SymbolEditor({ content, setLayer }) {
         </div>
 
         <div className="flex flex-row gap-3 items-center">
+          <p className="ts text-xl font-semibold w-56">Ombre</p>
+          <Slider
+            value={content.shadow ?? 4}
+            range={[0, 20]}
+            unit={'px'}
+            defaultValue={symbolDefaultState.shadow}
+            onChange={(shadow) => setLayer({ ...content, shadow })}
+          />
+        </div>
+
+        <div className="flex flex-row gap-3 items-center">
+          <p className="ts text-xl font-semibold w-56">Bordure</p>
+          <Slider
+            value={content.border ?? 0}
+            range={[0, 20]}
+            unit={'px'}
+            defaultValue={symbolDefaultState.border}
+            onChange={(border) => setLayer({ ...content, border })}
+          />
+        </div>
+
+        <div className="flex flex-row gap-3 items-center">
+          <p className="ts text-xl font-semibold w-56">Rotation</p>
+          <Slider
+            value={content.rotation ?? 0}
+            range={[-40, 40]}
+            unit={'°'}
+            defaultValue={symbolDefaultState.rotation}
+            onChange={(rotation) => setLayer({ ...content, rotation })}
+          />
+        </div>
+
+        <div className="flex flex-row gap-3 items-center">
           <p className="ts text-xl font-semibold w-56">Axe X</p>
           <Slider
             value={content.x ?? 0}
@@ -404,39 +437,6 @@ function SymbolEditor({ content, setLayer }) {
             unit={'px'}
             defaultValue={symbolDefaultState.y}
             onChange={(y) => setLayer({ ...content, y })}
-          />
-        </div>
-
-        <div className="flex flex-row gap-3 items-center">
-          <p className="ts text-xl font-semibold w-56">Ombre</p>
-          <Slider
-            value={content.shadow ?? 4}
-            range={[0, 20]}
-            unit={'px'}
-            defaultValue={symbolDefaultState.shadow}
-            onChange={(shadow) => setLayer({ ...content, shadow })}
-          />
-        </div>
-
-        <div className="flex flex-row gap-3 items-center">
-          <p className="ts text-xl font-semibold w-56">Rotation</p>
-          <Slider
-            value={content.rotation ?? 0}
-            range={[-40, 40]}
-            unit={'°'}
-            defaultValue={symbolDefaultState.rotation}
-            onChange={(rotation) => setLayer({ ...content, rotation })}
-          />
-        </div>
-
-        <div className="flex flex-row gap-3 items-center">
-          <p className="ts text-xl font-semibold w-56">Contour</p>
-          <Slider
-            value={content.border ?? 0}
-            range={[0, 20]}
-            unit={'px'}
-            defaultValue={symbolDefaultState.border}
-            onChange={(border) => setLayer({ ...content, border })}
           />
         </div>
       </div>
@@ -585,6 +585,7 @@ function PatternSelector({ selectedPattern, setSelectedPattern }) {
 }
 
 function SymbolSelector({ selectedSymbol, setSelectedSymbol }) {
+  const selectRef = useRef(null)
   const [selectedCategory, setSelectedCategory] = useState('Toutes')
   const [searchTerms, setSearchTerms] = useState('')
   const categories = ['Toutes', ...symbols.map((category) => category.category)]
@@ -607,7 +608,7 @@ function SymbolSelector({ selectedSymbol, setSelectedSymbol }) {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="ctl-pressable ctl-bw px-6 rounded-2xl flex items-center gap-4">
+      <div className="ctl-pressable ctl-bw px-6 rounded-2xl flex items-center gap-4 pr-4">
         <SearchIcon size={28} strokeWidth={2.5} className="ts" />
 
         <input
@@ -619,6 +620,7 @@ function SymbolSelector({ selectedSymbol, setSelectedSymbol }) {
         />
 
         <select
+          ref={selectRef}
           className="ts select color-white text-2xl font-medium py-3 w-70"
           value={selectedCategory}
           onChange={(e) => setSelectedCategory(e.target.value)}
@@ -629,6 +631,13 @@ function SymbolSelector({ selectedSymbol, setSelectedSymbol }) {
             </option>
           ))}
         </select>
+
+        <ChevronDown
+          size={56}
+          strokeWidth={2.5}
+          className="ts"
+          onClick={() => selectRef.current?.showPicker()}
+        />
       </div>
 
       <div className="flex flex-col ctl-container py-3 px-3 h-56 rounded-2xl overflow-scroll">

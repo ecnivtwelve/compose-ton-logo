@@ -121,7 +121,7 @@ const KeyboardEffect = () => {
           }}
         >
           <div className="keyboard-container panel">
-            <div className="p-4">
+            <div className="p-2">
               <SimpleKeyboard
                 keyboardRef={(r) => {
                   keyboardRef.current = r

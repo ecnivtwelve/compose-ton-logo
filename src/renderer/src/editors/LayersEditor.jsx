@@ -111,7 +111,7 @@ function LayersEditor({ document, setDocument, layer, setLayer, tab, setTab }) {
           {tab !== 'background' && (
             <Button
               key={document.length}
-              className="ctl-pressable ctl-button w-full h-13 min-h-13"
+              className="w-92 ctl-pressable ctl-button h-13 min-h-13"
               onClick={createNewLayer}
             >
               <PlusIcon className="ts" size={28} strokeWidth={2.5} />
@@ -130,7 +130,7 @@ function LayerItem({ item, i, layer, setLayer, setTab, deleteLayer, documentLeng
   const controls = useDragControls()
 
   const content = (
-    <div className="w-full flex flex-row gap-2 items-center">
+    <div className="w-92 flex flex-row gap-2 items-center">
       {!isFixed && (
         <div
           className="cursor-grab active:cursor-grabbing p-4 -m-2 opacity-50 flex items-center justify-center shrink-0"
