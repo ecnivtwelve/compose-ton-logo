@@ -684,7 +684,9 @@ function SymbolSelector({ selectedSymbol, setSelectedSymbol }) {
   return (
     <div className="flex flex-col gap-4">
       <div className="ctl-pressable ctl-bw px-6 rounded-2xl flex items-center gap-4 pr-4">
-        <SearchIcon size={28} strokeWidth={2.5} className="ts" />
+        <div className="w-8 h-8 flex items-center justify-center">
+          <SearchIcon size={28} strokeWidth={2.5} className="ts" />
+        </div>
 
         <input
           type="text"
