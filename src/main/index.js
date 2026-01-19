@@ -76,9 +76,8 @@ app.whenReady().then(() => {
   })
 
   ipcMain.on('relaunch-app', () => {
-    BrowserWindow.getAllWindows().forEach((win) => win.close())
-    createWindow()
-    createSecondWindow()
+    // Exit with code 42 to signal the batch file to relaunch
+    app.exit(42)
   })
 
   createWindow()

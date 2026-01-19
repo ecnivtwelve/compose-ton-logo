@@ -6,6 +6,8 @@ import Button from '../components/Button'
 import { Reorder, useDragControls } from 'motion/react'
 import { AnimatePresence, motion } from 'motion/react'
 
+import { symbols } from '../utils/symbols'
+
 import { useRef, useEffect } from 'react'
 
 function LayersEditor({ document, setDocument, layer, setLayer, tab, setTab }) {
@@ -129,6 +131,8 @@ function LayersEditor({ document, setDocument, layer, setLayer, tab, setTab }) {
 function LayerItem({ item, i, layer, setLayer, setTab, deleteLayer, documentLength, isFixed }) {
   const controls = useDragControls()
 
+  let Icon = item.type === 'symbols' ? item.symbol.svg : undefined
+
   const content = (
     <div className="w-92 flex flex-row gap-2 items-center">
       {!isFixed && (
@@ -154,13 +158,21 @@ function LayerItem({ item, i, layer, setLayer, setTab, deleteLayer, documentLeng
         }}
         tint={layer == i ? 'var(--primary)' : undefined}
       >
-        {tabs.find((tab) => tab.key == item.type).icon}
+        {item.type === 'symbols' ? (
+          <div className="ts">
+            <Icon width={24} height={24} fill="white" />
+          </div>
+        ) : (
+          tabs.find((tab) => tab.key == item.type).icon
+        )}
         <p className="ts text-left w-full font-semibold text-lg truncate min-w-0">
           {item.type === 'background'
             ? 'Arrière-plan'
             : item.type === 'text' && item.content.trim().length > 0
               ? item.content.trim()
-              : 'Calque ' + (i + 1)}
+              : item.type === 'symbols'
+                ? item.symbol.name
+                : 'Calque ' + (i + 1)}
         </p>
       </Button>
 
