@@ -35,7 +35,12 @@ export const backgroundDefaultState = {
   patternOpacity: 100,
   color: '#000000',
   size: 500,
-  radius: 20
+  radius: 20,
+  gradient: false,
+  gradientDirection: 0,
+  color2: '#FFFFFF',
+  blendModeEnabled: false,
+  blendMode: 'multiply'
 }
 
 export const defaultState = [backgroundDefaultState, textDefaultState]

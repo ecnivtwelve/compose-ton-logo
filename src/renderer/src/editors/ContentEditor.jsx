@@ -1,4 +1,12 @@
-import { ArrowDown, CheckIcon, ChevronDown, MinusIcon, SearchIcon, TypeIcon, XIcon } from 'lucide-react'
+import {
+  ArrowDown,
+  CheckIcon,
+  ChevronDown,
+  MinusIcon,
+  SearchIcon,
+  TypeIcon,
+  XIcon
+} from 'lucide-react'
 import { motion, AnimatePresence } from 'motion/react'
 import { useEffect, useState, useRef } from 'react'
 
@@ -512,6 +520,27 @@ function BackgroundEditor({ content, setLayer }) {
         onColorSelect={(color) => setLayerBg({ ...content, color: color })}
       />
 
+      <div className="flex flex-col gap-2">
+        <div className="flex flex-row gap-4 items-center">
+          <Checkbox
+            checked={content.gradient}
+            onChange={(gradient) => setLayerBg({ ...content, gradient })}
+          />
+          <p className="ts text-xl font-semibold w-full">Dégradé</p>
+        </div>
+      </div>
+
+      {content.gradient && (
+        <>
+          <div className="h-1" />
+          <p className="ts text-xl font-semibold">Couleur 2</p>
+          <ColorSelector
+            currentColor={content.color2}
+            onColorSelect={(color) => setLayerBg({ ...content, color2: color })}
+          />
+        </>
+      )}
+
       <div className="h-1" />
 
       <div className="flex flex-col gap-2">
@@ -537,6 +566,18 @@ function BackgroundEditor({ content, setLayer }) {
             defaultValue={backgroundDefaultState.patternOpacity}
             onChange={(patternOpacity) => setLayerBg({ ...content, patternOpacity })}
           />
+        </div>
+        <div className="flex flex-row gap-4 items-center">
+          <Checkbox
+            checked={content.blendModeEnabled}
+            onChange={(blendModeEnabled) => setLayerBg({ ...content, blendModeEnabled })}
+          />
+          <div>
+            <p className="ts text-xl font-semibold w-full">Mode de fusion</p>
+            <p className="opacity-70 ts text-lg font-regular w-full">
+              Adapte le motif aux couleurs sélectionnées
+            </p>
+          </div>
         </div>
       </div>
 
@@ -570,6 +611,18 @@ function BackgroundEditor({ content, setLayer }) {
             onChange={(radius) => setLayerBg({ ...content, radius })}
           />
         </div>
+        {content.gradient && (
+          <div className="flex flex-row gap-3 items-center">
+            <p className="ts text-xl font-semibold w-56">Direction dégradé</p>
+            <Slider
+              value={content.gradientDirection ?? 0}
+              range={[0, 360]}
+              unit={'°'}
+              defaultValue={backgroundDefaultState.gradientDirection}
+              onChange={(gradientDirection) => setLayerBg({ ...content, gradientDirection })}
+            />
+          </div>
+        )}
       </div>
 
       <div className="h-10" />

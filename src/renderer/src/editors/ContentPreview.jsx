@@ -202,7 +202,9 @@ export function ContentRenderer({ document, animated = true, simplified = false 
                       borderRadius: layer.radius,
                       width: layer.size,
                       height: layer.size,
-                      backgroundColor: layer.color,
+                      background: layer.gradient
+                        ? `linear-gradient(${layer.gradientDirection ?? 0}deg, ${layer.color}, ${layer.color2 ?? '#ffffff'})`
+                        : layer.color,
                       position: 'absolute',
                       visibility: layer.enabled ? 'visible' : 'hidden',
                       overflow: 'hidden'
@@ -212,7 +214,9 @@ export function ContentRenderer({ document, animated = true, simplified = false 
                       <img
                         src={pattern.default}
                         style={{
-                          opacity: layer.patternOpacity / 100
+                          opacity: layer.patternOpacity / 100,
+                          mixBlendMode: layer.blendModeEnabled ? layer.blendMode : undefined,
+                          filter: layer.blendModeEnabled ? `saturate(0)` : undefined
                         }}
                       />
                     )}
