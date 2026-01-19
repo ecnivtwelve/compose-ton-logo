@@ -86,16 +86,7 @@ const Intro = ({ onEnd }) => {
             position: 'absolute',
             zIndex: 1
           }}
-          animate={{
-            rotate: [0, 360],
-            scale: [1.5]
-          }}
-          transition={{
-            duration: 25,
-            ease: 'linear',
-            repeat: Infinity,
-            repeatDelay: 0
-          }}
+          className='ctl-rotateForever'
         />
       )}
     </motion.div>

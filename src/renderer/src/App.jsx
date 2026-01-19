@@ -26,6 +26,20 @@ import { tabs } from './utils/tabs'
 import packageJson from '../../../package.json'
 
 function App() {
+  const [showRestrictedControls, setShowRestrictedControls] = useState(false)
+
+  useEffect(() => {
+    const checkConfig = async () => {
+      try {
+        const config = await window.api.getAppConfig()
+        setShowRestrictedControls(config.isDev || config.isAdmin)
+      } catch (error) {
+        console.error('Failed to get app config:', error)
+      }
+    }
+    checkConfig()
+  }, [])
+
   const [document, setDocument] = useState(() =>
     defaultState.map((s) => ({ ...s, id: Math.random().toString(36).substr(2, 9) }))
   )
@@ -311,7 +325,7 @@ function App() {
           }}
           className="font-regular text-md"
         >
-          Version {packageJson.version}
+          Version {packageJson.version} {showRestrictedControls && '(admin)'}
         </Typography>
 
         <Typography
@@ -355,18 +369,9 @@ function App() {
           alt=""
           style={{
             position: 'absolute',
-            zIndex: 1
+            zIndex: 1,
           }}
-          animate={{
-            rotate: [0, 360],
-            scale: [1.5]
-          }}
-          transition={{
-            duration: 25,
-            ease: 'linear',
-            repeat: Infinity,
-            repeatDelay: 0
-          }}
+          className="ctl-rotateForever"
         />
       </div>
     )

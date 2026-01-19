@@ -1,4 +1,20 @@
+import { useState, useEffect } from 'react'
+
 function DevTools() {
+  const [showRestrictedControls, setShowRestrictedControls] = useState(false)
+
+  useEffect(() => {
+    const checkConfig = async () => {
+      try {
+        const config = await window.api.getAppConfig()
+        setShowRestrictedControls(config.isDev || config.isAdmin)
+      } catch (error) {
+        console.error('Failed to get app config:', error)
+      }
+    }
+    checkConfig()
+  }, [])
+
   const toggleFullscreen = () => {
     window.electron.ipcRenderer.send('toggle-fullscreen')
   }
@@ -46,9 +62,13 @@ function DevTools() {
       </style>
 
       <div className="dev-tools">
-        <button onClick={toggleFullscreen}>Toggle fullscreen</button>
-        <button onClick={handleDebug}>Debug</button>
-        <button onClick={handleReset}>Reset App</button>
+        {showRestrictedControls && (
+          <>
+            <button onClick={toggleFullscreen}>Toggle fullscreen</button>
+            <button onClick={handleDebug}>Debug</button>
+            <button onClick={handleReset}>Reset App</button>
+          </>
+        )}
         <button onClick={handleQuit}>Quitter</button>
       </div>
     </>

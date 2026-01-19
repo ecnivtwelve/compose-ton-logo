@@ -68,6 +68,13 @@ app.whenReady().then(() => {
     app.quit()
   })
 
+  ipcMain.handle('get-app-config', () => {
+    return {
+      isDev: is.dev,
+      isAdmin: process.argv.includes('--admin')
+    }
+  })
+
   ipcMain.on('relaunch-app', () => {
     BrowserWindow.getAllWindows().forEach((win) => win.close())
     createWindow()

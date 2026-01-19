@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import { Trash2, RotateCcw, X, Eraser } from 'lucide-react'
 import { motion, AnimatePresence } from 'motion/react'
 import Button from './Button'
@@ -13,6 +14,20 @@ export default function GalleryManager({
   onDelete,
   onClearAll
 }) {
+  const [canDelete, setCanDelete] = useState(false)
+
+  useEffect(() => {
+    const checkConfig = async () => {
+      try {
+        const config = await window.api.getAppConfig()
+        setCanDelete(config.isDev || config.isAdmin)
+      } catch (error) {
+        console.error('Failed to get app config:', error)
+      }
+    }
+    checkConfig()
+  }, [])
+
   return (
     <AnimatePresence>
       {visible && (
@@ -34,7 +49,7 @@ export default function GalleryManager({
             <div className="gallery-header">
               <Typography className="font-bold text-3xl">Historique des logos envoyés</Typography>
               <div className="flex gap-2">
-                {savedLogos.length > 0 && (
+                {savedLogos.length > 0 && canDelete && (
                   <Button
                     tint="#C52E2E"
                     onClick={onClearAll}
@@ -97,13 +112,15 @@ export default function GalleryManager({
                         </Typography>
                       </div>
                       <div className="logo-actions">
-                        <Button
-                          tint="#C52E2E"
-                          onClick={() => onDelete(item.id)}
-                          style={{ padding: '8px 16px', height: 'auto', flex: 0 }}
-                        >
-                          <Trash2 className="ts" size={22} />
-                        </Button>
+                        {canDelete && (
+                          <Button
+                            tint="#C52E2E"
+                            onClick={() => onDelete(item.id)}
+                            style={{ padding: '8px 16px', height: 'auto', flex: 0 }}
+                          >
+                            <Trash2 className="ts" size={22} />
+                          </Button>
+                        )}
                         <Button
                           tint="#12C958"
                           onClick={() => onReinject(item)}

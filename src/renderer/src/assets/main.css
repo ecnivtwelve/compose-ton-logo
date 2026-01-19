@@ -168,3 +168,17 @@ select {
 option {
   background: #00000088 !important;
 }
+
+.ctl-rotateForever {
+  animation: rotateForever 25s linear infinite;
+}
+
+@keyframes rotateForever {
+  from {
+    transform: rotate(0deg) scale(1.3);
+  }
+
+  to {
+    transform: rotate(360deg) scale(1.3);
+  }
+}
