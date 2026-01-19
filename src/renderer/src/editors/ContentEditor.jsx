@@ -270,6 +270,17 @@ function TextEditor({ content, setLayer }) {
             </div>
 
             <div className="flex flex-row gap-3 items-center">
+              <p className="ts text-xl font-semibold w-56">Opacité</p>
+              <Slider
+                value={content.opacity ?? 100}
+                range={[1, 100]}
+                unit={'%'}
+                defaultValue={textDefaultState.opacity}
+                onChange={(opacity) => setLayer({ ...content, opacity })}
+              />
+            </div>
+
+            <div className="flex flex-row gap-3 items-center">
               <p className="ts text-xl font-semibold w-56">Bordure</p>
               <Slider
                 value={content.border ?? 0}
@@ -295,7 +306,7 @@ function TextEditor({ content, setLayer }) {
               <p className="ts text-xl font-semibold w-56">Rotation</p>
               <Slider
                 value={content.rotation ?? 0}
-                range={[-40, 40]}
+                range={[-180, 180]}
                 unit={'°'}
                 defaultValue={textDefaultState.rotation}
                 onChange={(rotation) => setLayer({ ...content, rotation })}
@@ -397,6 +408,17 @@ function SymbolEditor({ content, setLayer }) {
         </div>
 
         <div className="flex flex-row gap-3 items-center">
+          <p className="ts text-xl font-semibold w-56">Opacité</p>
+          <Slider
+            value={content.opacity ?? 100}
+            range={[1, 100]}
+            unit={'%'}
+            defaultValue={symbolDefaultState.opacity}
+            onChange={(opacity) => setLayer({ ...content, opacity })}
+          />
+        </div>
+
+        <div className="flex flex-row gap-3 items-center">
           <p className="ts text-xl font-semibold w-56">Bordure</p>
           <Slider
             value={content.border ?? 0}
@@ -411,7 +433,7 @@ function SymbolEditor({ content, setLayer }) {
           <p className="ts text-xl font-semibold w-56">Rotation</p>
           <Slider
             value={content.rotation ?? 0}
-            range={[-40, 40]}
+            range={[-180, 180]}
             unit={'°'}
             defaultValue={symbolDefaultState.rotation}
             onChange={(rotation) => setLayer({ ...content, rotation })}
@@ -721,20 +743,20 @@ function FontSelector({ text = 'Texte', currentFont, onFontSelect }) {
 
 function ColorSelector({ currentColor, onColorSelect }) {
   const colors = [
-    '#E65540', // Red/Orange
-    '#F1A340', // Orange/Gold
-    '#F3E54F', // Yellow
-    '#6DD36B', // Bright Green
-    '#57ACDE', // Sky Blue (Selected)
-    '#D34D91', // Pink/Magenta
-    '#FFFFFF', // White
-    '#8C3626', // Deep Red/Brown
-    '#8A6430', // Bronze/Brown
-    '#8F8B35', // Olive/Mustard
-    '#3B7C4F', // Forest Green
-    '#446E8C', // Muted/Steel Blue
-    '#7B3D64', // Deep Plum/Purple
-    '#000000' // Black
+    '#FF3E11',
+    '#FFD700',
+    '#ADFF2F',
+    '#00FF7F',
+    '#00E5FF',
+    '#BF00FF',
+    '#FFFFFF',
+    '#813f0c',
+    '#fff6a1',
+    '#acb70e',
+    '#18aa02',
+    '#427ae3',
+    '#e64490',
+    '#000000'
   ]
 
   const playButtonSound = () => {

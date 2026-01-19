@@ -4,7 +4,7 @@ export const textDefaultState = {
   type: 'text',
   content: '',
   font: 'Impact',
-  color: '#ffffff',
+  color: '#FFFFFF',
   size: 64,
   width: 100,
   rotation: 0,
@@ -12,7 +12,8 @@ export const textDefaultState = {
   y: 0,
   shadow: 4,
   border: 0,
-  letterSpacing: -5
+  letterSpacing: -5,
+  opacity: 100
 }
 
 export const symbolDefaultState = {
@@ -24,7 +25,8 @@ export const symbolDefaultState = {
   x: 0,
   y: 0,
   shadow: 4,
-  border: 0
+  border: 0,
+  opacity: 100
 }
 
 export const backgroundDefaultState = {

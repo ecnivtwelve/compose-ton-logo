@@ -107,7 +107,8 @@ export function ContentRenderer({ document, animated = true, simplified = false 
                     textAlign: 'center',
                     WebkitTextStrokeWidth: `${layer.border}px`,
                     WebkitTextStrokeColor: '#000',
-                    lineHeight: layer.size ? `${layer.size}px` : '48px'
+                    lineHeight: layer.size ? `${layer.size}px` : '48px',
+                    opacity: layer.opacity / 100
                   }}
                 >
                   {layer.content}
@@ -162,7 +163,8 @@ export function ContentRenderer({ document, animated = true, simplified = false 
                     filter: !simplified
                       ? `drop-shadow(0px 0px ${layer.shadow}px rgba(0, 0, 0, 0.8))`
                       : 'none',
-                    overflow: 'visible'
+                    overflow: 'visible',
+                    opacity: layer.opacity / 100
                   }}
                 />
               )

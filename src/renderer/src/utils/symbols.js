@@ -76,6 +76,10 @@ import VoitureClassicIcon from '../assets/svg/Voiture-classic.svg?react'
 import RondContourIcon from '../assets/svg/rond-contour.svg?react'
 import RondRempliIcon from '../assets/svg/rond-rempli.svg?react'
 
+import TriskellIcon from '../assets/svg/triskell.svg?react'
+import HermineIcon from '../assets/svg/hermine.svg?react'
+import PapillonIcon from '../assets/svg/papillon.svg?react'
+
 export const symbols = [
   {
     category: 'Cinéma',
@@ -154,6 +158,11 @@ export const symbols = [
         name: 'Piano',
         tags: 'musique, instrument, piano',
         svg: PianoIcon
+      },
+      {
+        name: 'Batterie',
+        tags: 'divers, batterie, énergie',
+        svg: BatterieIcon
       }
     ]
   },
@@ -249,6 +258,11 @@ export const symbols = [
         name: 'Patte',
         tags: 'patte, paw, animal',
         svg: PawIcon
+      },
+      {
+        name: 'Papillon',
+        tags: 'papillon, insecte, butterfly',
+        svg: PapillonIcon
       }
     ]
   },
@@ -473,12 +487,17 @@ export const symbols = [
     ]
   },
   {
-    category: 'Divers',
+    category: 'Bretagne',
     symbols: [
       {
-        name: 'Batterie',
-        tags: 'divers, batterie, énergie',
-        svg: BatterieIcon
+        name: 'Triskell',
+        tags: 'triskell, bretagne',
+        svg: TriskellIcon
+      },
+      {
+        name: 'Hermine',
+        tags: 'hermine, bretagne',
+        svg: HermineIcon
       }
     ]
   }
