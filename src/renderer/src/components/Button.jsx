@@ -1,8 +1,8 @@
 import popSound from '../assets/sounds/pop.mp3'
 
-const Button = ({ children, tint, onClick, ...extraProps }) => {
+const Button = ({ children, tint, onClick, customSound, ...extraProps }) => {
   const playButtonSound = () => {
-    const buttonSound = new Audio(popSound)
+    const buttonSound = new Audio(customSound || popSound)
     buttonSound.play()
   }
 

@@ -14,12 +14,13 @@ function Alert({
   confirmTint = '#C52E2E',
   cancelTint = null,
   cancelText = 'Annuler',
-  hideCancel = false
+  hideCancel = false,
+  customSound
 }) {
   useEffect(() => {
-    const audio = new Audio(confirmSound)
+    const audio = new Audio(customSound || confirmSound)
     if (visible) audio.play()
-  }, [visible])
+  }, [visible, customSound])
 
   return (
     <AnimatePresence>

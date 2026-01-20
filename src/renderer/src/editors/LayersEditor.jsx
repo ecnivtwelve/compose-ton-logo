@@ -1,16 +1,23 @@
-import { PlusIcon, XIcon, GripVertical } from 'lucide-react'
+import { PlusIcon, XIcon, GripVertical, Timer } from 'lucide-react'
 import logo from '../assets/img/logo.png'
 import { symbolDefaultState, textDefaultState } from '../utils/consts'
 import { tabs } from '../utils/tabs'
 import Button from '../components/Button'
 import { Reorder, useDragControls } from 'motion/react'
-import { AnimatePresence, motion } from 'motion/react'
-
-import { symbols } from '../utils/symbols'
+import { motion } from 'motion/react'
 
 import { useRef, useEffect } from 'react'
 
-function LayersEditor({ document, setDocument, layer, setLayer, tab, setTab }) {
+function LayersEditor({
+  document,
+  setDocument,
+  layer,
+  setLayer,
+  tab,
+  setTab,
+  challengeMode,
+  challengeTimeLeft
+}) {
   const scrollRef = useRef(null)
   const prevTabRef = useRef(tab)
   useEffect(() => {
@@ -123,6 +130,18 @@ function LayersEditor({ document, setDocument, layer, setLayer, tab, setTab }) {
             </Button>
           )}
         </div>
+
+        {challengeMode && (
+          <div className="w-full px-6 pb-12 w-full flex flex-row items-center justify-center">
+            <div className={`flex flex-row items-center justify-center gap-3 bg-[#00000080] py-2 px-6 rounded-2xl ${challengeTimeLeft <= 60 ? 'ctl-challengeWarn' : ''}`}>
+              <Timer className="ts text-white" size={62} />
+              <p className="ts text-white text-7xl font-bold font-mono pt-1">
+                {Math.floor(challengeTimeLeft / 60)}:
+                {(challengeTimeLeft % 60).toString().padStart(2, '0')}
+              </p>
+            </div>
+          </div>
+        )}
       </motion.div>
     </>
   )

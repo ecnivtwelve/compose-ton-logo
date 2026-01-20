@@ -5,7 +5,16 @@ import ContentEditor from './editors/ContentEditor'
 import ContentPreview, { ContentRenderer } from './editors/ContentPreview'
 import { useMemo, useRef, useState, useEffect } from 'react'
 import { toPng } from 'html-to-image'
-import { Airplay, ArrowLeft, AtSignIcon, Mail, PlayIcon, XIcon } from 'lucide-react'
+import {
+  Airplay,
+  ArrowLeft,
+  AtSignIcon,
+  Mail,
+  PlayIcon,
+  XIcon,
+  Timer,
+  DoorOpenIcon
+} from 'lucide-react'
 import { defaultState, symbolDefaultState, textDefaultState } from './utils/consts'
 import Alert from './effects/Alert'
 import { ErrorBoundary } from 'react-error-boundary'
@@ -18,7 +27,9 @@ import background from './assets/img/background.svg'
 import logo from './assets/img/logo.png'
 import credits from './assets/img/credits.svg'
 
+import timerSound from './assets/sounds/timer.ogg'
 import doneSound from './assets/sounds/ctl_done.ogg'
+import startSound from './assets/sounds/start.mp3'
 import upLight from './assets/img/up_light.png'
 
 import { tabs } from './utils/tabs'
@@ -143,6 +154,9 @@ function App() {
       window.electron.ipcRenderer.send('send-logo', serializableDoc)
 
       setTimeout(() => {
+        if (challengeMode) {
+          setChallengeRecapVisible(true)
+        }
         setAboutToSave(false)
         setSending(false)
       }, 2000)
@@ -153,10 +167,6 @@ function App() {
 
   const emailPopup = () => {
     setEmailPopupShown(true)
-  }
-
-  const closeEmailPopup = () => {
-    setEmailPopupShown(false)
   }
 
   const [emailSent, setEmailSent] = useState(false)
@@ -224,17 +234,77 @@ function App() {
     setTab('text')
     setCurrentLogoId(null)
     setAboutToSave(false)
+    setChallengeMode(false)
+    setChallengeTimeLeft(180)
     setResetConfirmVisible(false)
+    setChallengeFinishConfirmVisible(false)
+    setChallengeRecapVisible(false)
   }
 
   const [editingMode, setEditingMode] = useState(false)
   const [inactivityAlertVisible, setInactivityAlertVisible] = useState(false)
   const [inactivityCount, setInactivityCount] = useState(10)
 
+  // Challenge Mode Logic
+  const [challengeMode, setChallengeMode] = useState(false)
+  const [challengeExplainerVisible, setChallengeExplainerVisible] = useState(false)
+  const [challengeFinishConfirmVisible, setChallengeFinishConfirmVisible] = useState(false)
+  const [challengeRecapVisible, setChallengeRecapVisible] = useState(false)
+  const [challengeTimeLeft, setChallengeTimeLeft] = useState(180) // 3 minutes
+
+  const timerAudio = useMemo(() => new Audio(timerSound), [])
+
+  const stopTimerAudio = () => {
+    timerAudio.pause()
+    timerAudio.currentTime = 0
+  }
+
   const startEditing = () => {
     resetLogo()
     setEditingMode(true)
   }
+
+  const startChallenge = () => {
+    resetLogo()
+    setChallengeMode(true)
+    setChallengeTimeLeft(180)
+    setEditingMode(true)
+    setChallengeExplainerVisible(false)
+    stopTimerAudio()
+    timerAudio.play()
+  }
+
+  useEffect(() => {
+    if (
+      !challengeMode ||
+      !editingMode ||
+      aboutToSave ||
+      challengeFinishConfirmVisible ||
+      challengeRecapVisible
+    )
+      return
+
+    if (challengeTimeLeft <= 0) {
+      // Time's up!
+      const doneAudio = new Audio(doneSound)
+      doneAudio.play()
+      setAboutToSave(true)
+      return
+    }
+
+    const timer = setInterval(() => {
+      setChallengeTimeLeft((prev) => prev - 1)
+    }, 1000)
+
+    return () => clearInterval(timer)
+  }, [
+    challengeMode,
+    editingMode,
+    aboutToSave,
+    challengeTimeLeft,
+    challengeFinishConfirmVisible,
+    challengeRecapVisible
+  ])
 
   const inactivityTimerRef = useRef(null)
   const resetLogoRef = useRef(resetLogo)
@@ -243,7 +313,7 @@ function App() {
   })
 
   useEffect(() => {
-    if (!editingMode || inactivityAlertVisible) return
+    if (!editingMode || inactivityAlertVisible || challengeMode) return
 
     const resetTimer = () => {
       if (inactivityTimerRef.current) clearTimeout(inactivityTimerRef.current)
@@ -270,7 +340,7 @@ function App() {
         window.removeEventListener(event, handleActivity)
       })
     }
-  }, [editingMode, inactivityAlertVisible])
+  }, [editingMode, inactivityAlertVisible, challengeMode])
 
   useEffect(() => {
     if (!inactivityAlertVisible) return
@@ -295,26 +365,72 @@ function App() {
     resetLogo()
     setEditingMode(false)
     setQuitConfirmVisible(false)
+    stopTimerAudio()
   }
 
   if (!editingMode) {
     return (
       <div
         className="w-full h-full flex items-center justify-center bg-black"
-        onClick={() => startEditing()}
+      // onClick={() => startEditing()}
       >
-        <Button
-          tint="#12C958"
-          onClick={() => startEditing()}
+        <div
+          className="flex flex-row gap-4 items-center justify-center"
           style={{
             position: 'absolute',
             zIndex: 2,
             bottom: 120
           }}
         >
-          <PlayIcon className="ts" size={32} fill="#FFF" />
-          <p className="ts text-3xl font-semibold">Créer mon logo</p>
-        </Button>
+          <Button tint="#12C958" onClick={() => startEditing()} customSound={startSound}>
+            <PlayIcon className="ts" size={32} fill="#FFF" />
+            <p className="ts text-3xl font-semibold">Créer mon logo</p>
+          </Button>
+
+          <Button
+            tint="#D946EF"
+            onClick={() => setChallengeExplainerVisible(true)}
+            customSound={startSound}
+          >
+            <Timer className="ts" size={32} />
+            <p className="ts text-3xl font-semibold">Mode Challenge</p>
+          </Button>
+        </div>
+
+        <AnimatePresence>
+          {challengeExplainerVisible && (
+            <motion.div
+              className="fixed top-0 left-0 w-full h-full flex items-center justify-center"
+              style={{
+                backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                zIndex: 99,
+                backdropFilter: 'blur(5px)'
+              }}
+              initial={{ opacity: 0, scale: 1.4 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 1.2 }}
+              transition={{ duration: 0.2 }}
+            >
+              <div className="p-10 rounded-3xl w-326 flex flex-col gap-4 items-center">
+                <Timer size={64} className="text-[#D946EF] mb-2" />
+                <p className="ts text-5xl text-center font-semibold">Mode Challenge</p>
+                <p className="ts text-3xl text-center mb-4">
+                  Vous avez 3 minutes pour réaliser le meilleur logo possible !<br />
+                  Une fois le temps écoulé, le logo est automatiquement terminé.
+                </p>
+
+                <div className="flex flex-row items-center justify-center w-full gap-4 mt-2">
+                  <Button onClick={() => setChallengeExplainerVisible(false)}>
+                    <p className="ts text-3xl font-semibold">Annuler</p>
+                  </Button>
+                  <Button tint={'#D946EF'} onClick={() => startChallenge()}>
+                    <p className="ts text-3xl font-semibold">C&apos;est parti !</p>
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         <Typography
           style={{
@@ -369,7 +485,7 @@ function App() {
           alt=""
           style={{
             position: 'absolute',
-            zIndex: 1,
+            zIndex: 1
           }}
           className="ctl-rotateForever"
         />
@@ -430,12 +546,14 @@ function App() {
         message="Voulez-vous vraiment recommencer à partir du début ?"
         onConfirm={() => {
           resetLogo()
+          stopTimerAudio()
+          if (challengeMode) {
+            startChallenge()
+          }
         }}
         confirmText="Recommencer"
         onCancel={() => setResetConfirmVisible(false)}
       />
-
-
 
       <Alert
         visible={quitConfirmVisible}
@@ -443,6 +561,7 @@ function App() {
         message="Voulez-vous vraiment quitter la création du logo ? Votre travail sera perdu."
         onConfirm={() => {
           quitLogo()
+          stopTimerAudio()
         }}
         confirmText="Quitter"
         onCancel={() => setQuitConfirmVisible(false)}
@@ -458,6 +577,70 @@ function App() {
         confirmText="OK"
         hideCancel
       />
+
+      <Alert
+        visible={challengeFinishConfirmVisible}
+        title="Terminer le challenge ?"
+        message="Attention, vous ne pourrez plus revenir en arrière. Êtes-vous sûr de vouloir terminer ?"
+        onConfirm={() => {
+          setChallengeFinishConfirmVisible(false)
+          setAboutToSave(true)
+          stopTimerAudio()
+        }}
+        confirmText="Terminer"
+        confirmTint="#12C958"
+        cancelTint="#C52E2E"
+        onCancel={() => setChallengeFinishConfirmVisible(false)}
+      />
+
+      <AnimatePresence>
+        {challengeRecapVisible && (
+          <motion.div
+            className="fixed top-0 left-0 w-full h-full flex items-center justify-center"
+            style={{
+              backgroundColor: 'rgba(0, 0, 0, 0.7)',
+              zIndex: 99999, // Very high z-index to stay on top
+              backdropFilter: 'blur(10px)'
+            }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <div className="flex flex-col items-center gap-8">
+              <div className="flex flex-col items-center">
+                <p className="text-white text-5xl font-semibold">Challenge Terminé !</p>
+                <p className="text-white text-2xl font-medium mt-2 opacity-80">
+                  Temps réalisé :{' '}
+                  {(() => {
+                    const spent = 180 - challengeTimeLeft
+                    const mins = Math.floor(spent / 60)
+                    const secs = spent % 60
+                    return `${mins} min ${secs.toString().padStart(2, '0')}`
+                  })()}
+                </p>
+              </div>
+
+              <div
+                className="relative bg-transparent rounded-xl overflow-visible"
+                style={{ width: 600, height: 600 }}
+              >
+                <ContentRenderer document={document} animated={false} simplified={false} />
+              </div>
+
+              <Button
+                tint="#C52E2E"
+                onClick={() => {
+                  setChallengeRecapVisible(false)
+                  quitLogo()
+                }}
+              >
+                <DoorOpenIcon size={32} strokeWidth={2.5} className="ts" />
+                <Typography className="font-semibold text-3xl">Quitter</Typography>
+              </Button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <AnimatePresence>
         {emailPopupShown && (
@@ -553,6 +736,8 @@ function App() {
                 setLayer={setLayer}
                 tab={tab}
                 setTab={setTab}
+                challengeMode={challengeMode}
+                challengeTimeLeft={challengeTimeLeft}
               />
               <ContentEditor
                 document={document}
@@ -618,22 +803,42 @@ function App() {
                   exit={{ opacity: 0, transition: { delay: 0 } }}
                   transition={{ duration: 0.5, delay: 0.3, ease: [0.3, 0, 0, 1] }}
                 >
-                  <Button
-                    tint={!sending && '#C52E2E'}
-                    onClick={() => {
-                      if (sending) return false
-                      setAboutToSave(false)
-                      setSending(false)
-                    }}
-                    style={{
-                      opacity: sending ? 0.5 : 1
-                    }}
-                  >
-                    <ArrowLeft size={28} strokeWidth={2.5} className="ts" />
-                    <Typography className="font-semibold text-xl">
-                      Revenir à l’écran précédent
-                    </Typography>
-                  </Button>
+                  {!challengeMode && (
+                    <Button
+                      tint={!sending && '#C52E2E'}
+                      onClick={() => {
+                        if (sending) return false
+                        setAboutToSave(false)
+                        setSending(false)
+                      }}
+                      style={{
+                        opacity: sending ? 0.5 : 1
+                      }}
+                    >
+                      <ArrowLeft size={28} strokeWidth={2.5} className="ts" />
+                      <Typography className="font-semibold text-xl">
+                        Revenir à l’écran précédent
+                      </Typography>
+                    </Button>
+                  )}
+
+                  {challengeMode && (
+                    <Button
+                      tint={!sending && '#C52E2E'}
+                      onClick={() => {
+                        resetLogo()
+                        setEditingMode(false)
+                      }}
+                      style={{
+                        opacity: sending ? 0.5 : 1
+                      }}
+                    >
+                      <XIcon size={28} strokeWidth={2.5} className="ts" />
+                      <Typography className="font-semibold text-xl">
+                        Abandonner / Recommencer
+                      </Typography>
+                    </Button>
+                  )}
                   <Button tint="#0055FF" onClick={() => emailPopup()}>
                     <Mail size={28} strokeWidth={2.5} className="ts" />
                     <Typography className="font-semibold text-xl">Recevoir par e-mail</Typography>
@@ -691,7 +896,13 @@ function App() {
               setQuitConfirmVisible(true)
             }}
             reset={() => setResetConfirmVisible(true)}
-            done={() => setAboutToSave(true)}
+            done={() => {
+              if (challengeMode) {
+                setChallengeFinishConfirmVisible(true)
+              } else {
+                setAboutToSave(true)
+              }
+            }}
             history={() => setGalleryVisible(true)}
           />
         )}
