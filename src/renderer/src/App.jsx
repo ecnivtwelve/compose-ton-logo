@@ -8,12 +8,8 @@ import { toPng } from 'html-to-image'
 import {
   Airplay,
   ArrowLeft,
-  AtSignIcon,
   Mail,
-  PlayIcon,
-  XIcon,
-  Timer,
-  DoorOpenIcon
+  XIcon
 } from 'lucide-react'
 import { defaultState, symbolDefaultState, textDefaultState } from './utils/consts'
 import Alert from './effects/Alert'
@@ -23,18 +19,15 @@ import Button from './components/Button'
 import Typography from './components/Typography'
 import FormData from 'form-data'
 import Mailgun from 'mailgun.js'
-import background from './assets/img/background.svg'
-import logo from './assets/img/logo.png'
-import credits from './assets/img/credits.svg'
-
 import timerSound from './assets/sounds/timer.ogg'
 import doneSound from './assets/sounds/ctl_done.ogg'
-import startSound from './assets/sounds/start.mp3'
+import { tabs } from './utils/tabs'
 import upLight from './assets/img/up_light.png'
 
-import { tabs } from './utils/tabs'
-
-import packageJson from '../../../package.json'
+import WelcomeScreen from './components/App/WelcomeScreen'
+import RecapModal from './components/App/RecapModal'
+import EmailModal from './components/App/EmailModal'
+import AppAlerts from './components/App/AppAlerts'
 
 function App() {
   const [showRestrictedControls, setShowRestrictedControls] = useState(false)
@@ -55,16 +48,13 @@ function App() {
     defaultState.map((s) => ({ ...s, id: Math.random().toString(36).substr(2, 9) }))
   )
   const [tab, setTab] = useState('text')
-
   const [layer, setLayer] = useState(1)
 
   const [resetConfirmVisible, setResetConfirmVisible] = useState(false)
   const [quitConfirmVisible, setQuitConfirmVisible] = useState(false)
-
   const [aboutToSave, setAboutToSave] = useState(false)
   const [sending, setSending] = useState(false)
   const [currentLogoId, setCurrentLogoId] = useState(null)
-
   const [galleryVisible, setGalleryVisible] = useState(false)
 
   const [savedLogos, setSavedLogos] = useState(() => {
@@ -72,10 +62,8 @@ function App() {
       const loaded = JSON.parse(localStorage.getItem('sentLogos') || '[]')
       // Deduplicate by ID
       const unique = Array.from(new Map(loaded.map((item) => [item.id, item])).values())
-
       // Sort by timestamp if needed (already sorted by unshift, but good to be safe)
       unique.sort((a, b) => b.timestamp - a.timestamp)
-
       return unique
     } catch (e) {
       console.error('Failed to parse saved logos', e)
@@ -91,18 +79,15 @@ function App() {
     if (currentLogoId) {
       const index = updatedLogos.findIndex((l) => l.id === currentLogoId)
       if (index !== -1) {
-        // Update existing
         const item = updatedLogos.splice(index, 1)[0]
         item.data = doc
         item.timestamp = timestamp
         updatedLogos.unshift(item)
       } else {
-        // ID not found (maybe deleted?), treat as new
         const newLogo = { id: currentLogoId, timestamp, data: doc }
         updatedLogos.unshift(newLogo)
       }
     } else {
-      // New
       const newId = Math.random().toString(36).substr(2, 9)
       const newLogo = {
         id: newId,
@@ -164,21 +149,19 @@ function App() {
   }
 
   const [emailPopupShown, setEmailPopupShown] = useState(false)
-
   const emailPopup = () => {
     setEmailPopupShown(true)
   }
 
   const [emailSent, setEmailSent] = useState(false)
-
   const [email, setEmail] = useState('')
+  // eslint-disable-next-line no-unused-vars
   const emailInputRef = useRef(null)
   const [emailInputFocus, setEmailInputFocus] = useState(false)
   const captureRef = useRef(null)
   const [mailError, setMailError] = useState(null)
 
   const sendEmail = async () => {
-    // check if mail is valid
     const mailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!mailRegex.test(email)) {
       setMailError("Email invalide. Assurez-vous d'avoir indiqué un email valide.")
@@ -189,14 +172,11 @@ function App() {
     const mg = mailgun.client({
       username: 'api',
       key: 'dd835a51f28fb48c03778236ee6975a3-42b8ce75-0de63f49',
-      // When you have an EU-domain, you must specify the endpoint:
       url: 'https://api.eu.mailgun.net'
     })
     try {
       let attachment = undefined
       if (captureRef.current) {
-        // Wait a bit for images to load if needed, but usually they are preloaded.
-        // Also, might want to show a loading state in the UI.
         const dataUrl = await toPng(captureRef.current, { cacheBust: true, pixelRatio: 1 })
         const blob = await (await fetch(dataUrl)).blob()
         attachment = new File([blob], 'logo.png', { type: 'image/png' })
@@ -214,7 +194,7 @@ function App() {
       setEmailPopupShown(false)
       setEmailSent(true)
     } catch (error) {
-      console.log(error) //logs any error
+      console.log(error)
       setMailError(error.message)
     }
   }
@@ -285,7 +265,6 @@ function App() {
       return
 
     if (challengeTimeLeft <= 0) {
-      // Time's up!
       const doneAudio = new Audio(doneSound)
       doneAudio.play()
       setAboutToSave(true)
@@ -376,126 +355,13 @@ function App() {
 
   if (!editingMode) {
     return (
-      <div
-        className="w-full h-full flex items-center justify-center bg-black"
-      // onClick={() => startEditing()}
-      >
-        <div
-          className="flex flex-row gap-4 items-center justify-center"
-          style={{
-            position: 'absolute',
-            zIndex: 2,
-            bottom: 120
-          }}
-        >
-          <Button tint="#12C958" onClick={() => startEditing()} customSound={startSound}>
-            <PlayIcon className="ts" size={32} fill="#FFF" />
-            <p className="ts text-3xl font-semibold">Créer mon logo</p>
-          </Button>
-
-          <Button
-            tint="#D946EF"
-            onClick={() => setChallengeExplainerVisible(true)}
-            customSound={startSound}
-          >
-            <Timer className="ts" size={32} />
-            <p className="ts text-3xl font-semibold">Mode Challenge</p>
-          </Button>
-        </div>
-
-        <AnimatePresence>
-          {challengeExplainerVisible && (
-            <motion.div
-              className="fixed top-0 left-0 w-full h-full flex items-center justify-center"
-              style={{
-                backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                zIndex: 99,
-                backdropFilter: 'blur(5px)'
-              }}
-              initial={{ opacity: 0, scale: 1.4 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 1.2 }}
-              transition={{ duration: 0.2 }}
-            >
-              <div className="p-10 rounded-3xl w-326 flex flex-col gap-4 items-center">
-                <Timer size={64} className="text-[#D946EF] mb-2" />
-                <p className="ts text-5xl text-center font-semibold">Mode Challenge</p>
-                <p className="ts text-3xl text-center mb-4">
-                  Vous avez 3 minutes pour réaliser le meilleur logo possible !<br />
-                  Une fois le temps écoulé, le logo est automatiquement terminé.
-                </p>
-
-                <div className="flex flex-row items-center justify-center w-full gap-4 mt-2">
-                  <Button onClick={() => setChallengeExplainerVisible(false)}>
-                    <p className="ts text-3xl font-semibold">Annuler</p>
-                  </Button>
-                  <Button tint={'#D946EF'} onClick={() => startChallenge()}>
-                    <p className="ts text-3xl font-semibold">C&apos;est parti !</p>
-                  </Button>
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        <Typography
-          style={{
-            position: 'absolute',
-            zIndex: 3,
-            left: 20,
-            bottom: 20
-          }}
-          className="font-regular text-md"
-        >
-          Version {packageJson.version} {showRestrictedControls && '(admin)'}
-        </Typography>
-
-        <Typography
-          style={{
-            position: 'absolute',
-            zIndex: 2,
-            bottom: 40,
-            textAlign: 'center'
-          }}
-          className="font-regular text-md"
-        >
-          <span className="font-semibold">© 2025 IUT de Lannion — Département MMI — SAÉ 3.ALT</span>
-          <br />
-          Roxane OMNES et Vince LINISE
-        </Typography>
-
-        <img
-          src={credits}
-          style={{
-            position: 'absolute',
-            zIndex: 4,
-            bottom: 20,
-            right: 20,
-            height: 50,
-            filter: 'drop-shadow(0px 0px 4px rgba(0, 0, 0, 0.5))'
-          }}
-        />
-
-        <img
-          src={logo}
-          style={{
-            position: 'absolute',
-            zIndex: 2,
-            height: 300,
-            filter: 'drop-shadow(0px 0px 10px rgba(0, 0, 0, 0.5))'
-          }}
-        />
-
-        <motion.img
-          src={background}
-          alt=""
-          style={{
-            position: 'absolute',
-            zIndex: 1
-          }}
-          className="ctl-rotateForever"
-        />
-      </div>
+      <WelcomeScreen
+        showRestrictedControls={showRestrictedControls}
+        startEditing={startEditing}
+        setChallengeExplainerVisible={setChallengeExplainerVisible}
+        challengeExplainerVisible={challengeExplainerVisible}
+        startChallenge={startChallenge}
+      />
     )
   }
 
@@ -514,193 +380,49 @@ function App() {
         />
       )}
     >
-      <Alert
-        visible={inactivityAlertVisible}
-        title="Es-tu encore là ?"
-        message="Tu es inactif depuis un moment. Veux-tu continuer à composer ton logo ?"
-        cancelText={`Supprimer (${inactivityCount})`}
-        confirmText="Oui, je suis encore là"
-        cancelTint="#C52E2E"
-        confirmTint="#12C958"
-        onConfirm={() => {
-          setInactivityAlertVisible(false)
-          setInactivityCount(10)
-          setMailError(null)
-        }}
-        onCancel={() => {
-          setInactivityAlertVisible(false)
-          setInactivityCount(10)
-          setEditingMode(false)
-          resetLogo()
-        }}
+      <AppAlerts
+        inactivityAlertVisible={inactivityAlertVisible}
+        inactivityCount={inactivityCount}
+        setInactivityAlertVisible={setInactivityAlertVisible}
+        setInactivityCount={setInactivityCount}
+        setMailError={setMailError}
+        setEditingMode={setEditingMode}
+        resetLogo={resetLogo}
+        mailError={mailError}
+        resetConfirmVisible={resetConfirmVisible}
+        setResetConfirmVisible={setResetConfirmVisible}
+        stopTimerAudio={stopTimerAudio}
+        challengeMode={challengeMode}
+        startChallenge={startChallenge}
+        quitConfirmVisible={quitConfirmVisible}
+        setQuitConfirmVisible={setQuitConfirmVisible}
+        quitLogo={quitLogo}
+        emailSent={emailSent}
+        setEmailSent={setEmailSent}
+        challengeFinishConfirmVisible={challengeFinishConfirmVisible}
+        setChallengeFinishConfirmVisible={setChallengeFinishConfirmVisible}
+        setAboutToSave={setAboutToSave}
       />
 
-      <Alert
-        visible={mailError}
-        title="Impossible d'envoyer le mail"
-        message={mailError}
-        confirmText="OK"
-        onConfirm={() => {
-          setMailError(null)
-        }}
-        hideCancel
-      />
-
-      <Alert
-        visible={resetConfirmVisible}
-        title="Recommencer à zéro ?"
-        message="Voulez-vous vraiment recommencer à partir du début ?"
-        onConfirm={() => {
-          resetLogo()
-          stopTimerAudio()
-          if (challengeMode) {
-            startChallenge()
-          }
-        }}
-        confirmText="Recommencer"
-        onCancel={() => setResetConfirmVisible(false)}
-      />
-
-      <Alert
-        visible={quitConfirmVisible}
-        title="Quitter la création du logo ?"
-        message="Voulez-vous vraiment quitter la création du logo ? Votre travail sera perdu."
-        onConfirm={() => {
+      <RecapModal
+        visible={challengeRecapVisible}
+        challengeTimeLeft={challengeTimeLeft}
+        document={document}
+        onQuit={() => {
+          setChallengeRecapVisible(false)
           quitLogo()
-          stopTimerAudio()
         }}
-        confirmText="Quitter"
-        onCancel={() => setQuitConfirmVisible(false)}
       />
 
-      <Alert
-        visible={emailSent}
-        title="E-mail envoyé !"
-        message="Vous avez reçu votre logo sur votre boîte mail !"
-        onConfirm={() => {
-          setEmailSent(false)
-        }}
-        confirmText="OK"
-        hideCancel
+      <EmailModal
+        visible={emailPopupShown}
+        email={email}
+        setEmail={setEmail}
+        onCancel={() => setEmailPopupShown(false)}
+        onSend={sendEmail}
+        emailInputFocus={emailInputFocus}
+        setEmailInputFocus={setEmailInputFocus}
       />
-
-      <Alert
-        visible={challengeFinishConfirmVisible}
-        title="Terminer le challenge ?"
-        message="Attention, vous ne pourrez plus revenir en arrière. Êtes-vous sûr de vouloir terminer ?"
-        onConfirm={() => {
-          setChallengeFinishConfirmVisible(false)
-          setAboutToSave(true)
-          stopTimerAudio()
-        }}
-        confirmText="Terminer"
-        confirmTint="#12C958"
-        cancelTint="#C52E2E"
-        onCancel={() => setChallengeFinishConfirmVisible(false)}
-      />
-
-      <AnimatePresence>
-        {challengeRecapVisible && (
-          <motion.div
-            className="fixed top-0 left-0 w-full h-full flex items-center justify-center"
-            style={{
-              backgroundColor: 'rgba(0, 0, 0, 0.7)',
-              zIndex: 99999, // Very high z-index to stay on top
-              backdropFilter: 'blur(10px)'
-            }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            <div className="flex flex-col items-center gap-8">
-              <div className="flex flex-col items-center">
-                <p className="text-white text-5xl font-semibold">Challenge Terminé !</p>
-                <p className="text-white text-2xl font-medium mt-2 opacity-80">
-                  Temps réalisé :{' '}
-                  {(() => {
-                    const spent = 180 - challengeTimeLeft
-                    const mins = Math.floor(spent / 60)
-                    const secs = spent % 60
-                    return `${mins} min ${secs.toString().padStart(2, '0')}`
-                  })()}
-                </p>
-              </div>
-
-              <div
-                className="relative bg-transparent rounded-xl overflow-visible"
-                style={{ width: 600, height: 600 }}
-              >
-                <ContentRenderer document={document} animated={false} simplified={false} />
-              </div>
-
-              <Button
-                tint="#C52E2E"
-                onClick={() => {
-                  setChallengeRecapVisible(false)
-                  quitLogo()
-                }}
-              >
-                <DoorOpenIcon size={32} strokeWidth={2.5} className="ts" />
-                <Typography className="font-semibold text-3xl">Quitter</Typography>
-              </Button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      <AnimatePresence>
-        {emailPopupShown && (
-          <motion.div
-            className="fixed top-0 left-0 w-full h-full flex items-center justify-center"
-            style={{
-              backgroundColor: 'rgba(0, 0, 0, 0.5)',
-              zIndex: 99,
-              backdropFilter: 'blur(5px)'
-            }}
-            initial={{ opacity: 0, scale: 1.4 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 1.2 }}
-            transition={{ duration: 0.2 }}
-          >
-            <div className="p-10 rounded-3xl w-326 flex flex-col gap-4">
-              <p className="ts text-5xl text-center font-semibold">Recevoir le logo par e-mail</p>
-              <p className="ts text-3xl text-center mb-4">
-                Indiquez votre adresse e-mail pour recevoir le logo que vous venez de créer !
-              </p>
-
-              <div className="ctl-pressable ctl-bw px-6 rounded-2xl flex items-center gap-4">
-                <AtSignIcon size={28} strokeWidth={2.5} className="ts" />
-
-                <input
-                  ref={emailInputRef}
-                  type="text"
-                  placeholder="Votre adresse e-mail"
-                  className="ts color-white text-2xl font-medium py-4 w-full"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  onFocus={() => setEmailInputFocus(true)}
-                  onBlur={() => setEmailInputFocus(false)}
-                />
-
-                {email.length > 1 && (
-                  <XIcon size={32} strokeWidth={2.5} className="ts" onClick={() => setEmail('')} />
-                )}
-              </div>
-
-              <div className="flex flex-row items-center justify-center w-full gap-4 mt-2">
-                <Button onClick={() => setEmailPopupShown(false)}>
-                  <p className="ts text-3xl font-semibold">Annuler</p>
-                </Button>
-                <Button tint={'#0055FF'} onClick={() => sendEmail()}>
-                  <p className="ts text-3xl font-semibold">Recevoir un e-mail</p>
-                </Button>
-              </div>
-
-              {emailInputFocus && <div className="h-42" />}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       <div style={{ position: 'absolute', top: -9999, left: -9999 }}>
         <div ref={captureRef} style={{ width: 1000, height: 1000, backgroundColor: 'transparent' }}>
