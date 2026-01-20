@@ -368,6 +368,12 @@ function App() {
     stopTimerAudio()
   }
 
+  const [addNewCurrentLayerCount, setAddNewCurrentLayerCount] = useState(0)
+
+  const addNewCurrentLayer = () => {
+    setAddNewCurrentLayerCount((prev) => prev + 1)
+  }
+
   if (!editingMode) {
     return (
       <div
@@ -738,6 +744,7 @@ function App() {
                 setTab={setTab}
                 challengeMode={challengeMode}
                 challengeTimeLeft={challengeTimeLeft}
+                addNewCurrentLayerCount={addNewCurrentLayerCount}
               />
               <ContentEditor
                 document={document}
@@ -861,6 +868,10 @@ function App() {
             hasLogoBeenEdited={hasLogoBeenEdited}
             selectedTab={tab}
             setSelectedTab={(type) => {
+              if (type == tab && tab !== 'background') {
+                addNewCurrentLayer()
+              }
+
               if (type === 'background') {
                 setTab(type)
                 const bgIndex = document.findIndex((l) => l.type === 'background')

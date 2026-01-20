@@ -16,7 +16,8 @@ function LayersEditor({
   tab,
   setTab,
   challengeMode,
-  challengeTimeLeft
+  challengeTimeLeft,
+  addNewCurrentLayerCount
 }) {
   const scrollRef = useRef(null)
   const prevTabRef = useRef(tab)
@@ -61,6 +62,11 @@ function LayersEditor({
     newDocument.splice(i, 1)
     setDocument(newDocument)
   }
+
+  useEffect(() => {
+    if (addNewCurrentLayerCount == 0) return
+    createNewLayer()
+  }, [addNewCurrentLayerCount])
 
   const background = document.find((item) => item.type === 'background')
   const others = document.filter((item) => item.type !== 'background')
@@ -133,7 +139,9 @@ function LayersEditor({
 
         {challengeMode && (
           <div className="w-full px-6 pb-12 w-full flex flex-row items-center justify-center">
-            <div className={`flex flex-row items-center justify-center gap-3 bg-[#00000080] py-2 px-6 rounded-2xl ${challengeTimeLeft <= 60 ? 'ctl-challengeWarn' : ''}`}>
+            <div
+              className={`flex flex-row items-center justify-center gap-3 bg-[#00000080] py-2 px-6 rounded-2xl ${challengeTimeLeft <= 60 ? 'ctl-challengeWarn' : ''}`}
+            >
               <Timer className="ts text-white" size={62} />
               <p className="ts text-white text-7xl font-bold font-mono pt-1">
                 {Math.floor(challengeTimeLeft / 60)}:
