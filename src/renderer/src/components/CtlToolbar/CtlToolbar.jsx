@@ -3,6 +3,11 @@ import Button from '../Button'
 import Typography from '../Typography'
 import { motion } from 'motion/react'
 
+import tabs_1 from '../../assets/sounds/tabs_1.ogg'
+import tabs_2 from '../../assets/sounds/tabs_2.ogg'
+import tabs_3 from '../../assets/sounds/tabs_3.ogg'
+import upDoneSound from '../../assets/sounds/updone.ogg'
+
 import './CtlToolbar.css'
 
 function CtlToolbar({
@@ -38,11 +43,12 @@ function CtlToolbar({
         </Button>
       </div>
       <div className="flex gap-4 w-full justify-center">
-        {tabs.map((tab) => (
+        {tabs.map((tab, i) => (
           <Button
             key={tab.title}
             tint={selectedTab === tab.key ? 'var(--primary)' : undefined}
             onClick={() => setSelectedTab(tab.key)}
+            customSound={i === 0 ? tabs_1 : i === 1 ? tabs_2 : tabs_3}
           >
             {tab.icon}
             <Typography className="font-semibold text-xl">{tab.title}</Typography>
@@ -51,6 +57,7 @@ function CtlToolbar({
       </div>
       <div className="flex gap-4 w-full justify-end">
         <Button
+          customSound={upDoneSound}
           tint={hasLogoBeenEdited && '#12C958'}
           onClick={() => {
             if (hasLogoBeenEdited) {

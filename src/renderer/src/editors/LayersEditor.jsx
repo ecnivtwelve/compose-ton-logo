@@ -5,6 +5,8 @@ import Button from '../components/Button'
 import { Reorder } from 'motion/react'
 import { motion } from 'motion/react'
 import LayerItem from './LayerItem'
+import layerSound from '../assets/sounds/layer.mp3'
+
 
 import { useRef, useEffect } from 'react'
 
@@ -128,6 +130,7 @@ function LayersEditor({
               key={document.length}
               className="w-92 ctl-pressable ctl-button h-13 min-h-13"
               onClick={createNewLayer}
+              customSound={layerSound}
             >
               <PlusIcon className="ts" size={28} strokeWidth={2.5} />
               <p className="ts text-left w-full font-semibold text-lg truncate min-w-0">

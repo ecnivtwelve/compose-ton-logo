@@ -5,12 +5,7 @@ import ContentEditor from './editors/ContentEditor'
 import ContentPreview, { ContentRenderer } from './editors/ContentPreview'
 import { useMemo, useRef, useState, useEffect } from 'react'
 import { toPng } from 'html-to-image'
-import {
-  Airplay,
-  ArrowLeft,
-  Mail,
-  XIcon
-} from 'lucide-react'
+import { Airplay, ArrowLeft, Mail, XIcon } from 'lucide-react'
 import { defaultState, symbolDefaultState, textDefaultState } from './utils/consts'
 import Alert from './effects/Alert'
 import { ErrorBoundary } from 'react-error-boundary'
@@ -21,6 +16,7 @@ import FormData from 'form-data'
 import Mailgun from 'mailgun.js'
 import timerSound from './assets/sounds/timer.ogg'
 import doneSound from './assets/sounds/ctl_done.ogg'
+import aboutEndSound from './assets/sounds/about_end.ogg'
 import { tabs } from './utils/tabs'
 import upLight from './assets/img/up_light.png'
 
@@ -56,6 +52,7 @@ function App() {
   const [sending, setSending] = useState(false)
   const [currentLogoId, setCurrentLogoId] = useState(null)
   const [galleryVisible, setGalleryVisible] = useState(false)
+  const [sendError, setSendError] = useState(null)
 
   const [savedLogos, setSavedLogos] = useState(() => {
     try {
@@ -121,6 +118,16 @@ function App() {
   }
 
   const startSending = () => {
+    // Check for duplicates (only check against the very last sent logo, which represents what's on screen)
+    if (savedLogos.length > 0) {
+      const lastSentLogo = savedLogos[0]
+      // We check if the data is identical to the last sent logo
+      if (JSON.stringify(lastSentLogo.data) === JSON.stringify(document)) {
+        setSendError("Ce logo est déjà à l'écran.")
+        return
+      }
+    }
+
     setSending(false)
     setTimeout(() => {
       const doneAudio = new Audio(doneSound)
@@ -144,7 +151,8 @@ function App() {
         }
         setAboutToSave(false)
         setSending(false)
-      }, 2000)
+        quitLogo()
+      }, 3000)
     }, 100)
   }
 
@@ -213,6 +221,8 @@ function App() {
     setLayer(1)
     setTab('text')
     setCurrentLogoId(null)
+    setEmail('')
+    setEmailInputFocus(false)
     setAboutToSave(false)
     setChallengeMode(false)
     setChallengeTimeLeft(180)
@@ -402,6 +412,8 @@ function App() {
         challengeFinishConfirmVisible={challengeFinishConfirmVisible}
         setChallengeFinishConfirmVisible={setChallengeFinishConfirmVisible}
         setAboutToSave={setAboutToSave}
+        sendError={sendError}
+        setSendError={setSendError}
       />
 
       <RecapModal
@@ -430,6 +442,58 @@ function App() {
         </div>
       </div>
 
+      {sending && aboutToSave && (
+        <motion.div
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            objectFit: 'cover',
+            zIndex: 9999,
+            backgroundColor: 'green',
+            maskImage:
+              'radial-gradient(50% 50% at 50% 50%, rgba(255, 255, 255, 0.00) 0%, #FFF 100%)'
+          }}
+          animate={sending && aboutToSave ? { opacity: [0, 0.7, 0, 0] } : { opacity: 0 }}
+          transition={
+            sending && aboutToSave
+              ? {
+                duration: 2,
+                ease: 'easeInOut',
+                times: [0, 0.003, 0.2, 1]
+              }
+              : { duration: 0 }
+          }
+        />
+      )}
+
+      {sending && aboutToSave && (
+        <motion.div
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            objectFit: 'cover',
+            zIndex: 9999,
+            backgroundColor: 'black'
+          }}
+          animate={sending && aboutToSave ? { opacity: [0, 0, 0, 1] } : { opacity: 0 }}
+          transition={
+            sending && aboutToSave
+              ? {
+                duration: 3,
+                ease: 'easeInOut',
+                times: [0, 0.5, 0.85, 1]
+              }
+              : { duration: 0 }
+          }
+        />
+      )}
+
       <motion.img
         src={upLight}
         style={{
@@ -439,7 +503,7 @@ function App() {
           right: 0,
           bottom: 0,
           objectFit: 'cover',
-          zIndex: 9999
+          zIndex: 99999
         }}
         animate={sending && aboutToSave ? { opacity: [0, 0, 1, 0] } : { opacity: 0 }}
         transition={
@@ -572,7 +636,7 @@ function App() {
                     <Mail size={28} strokeWidth={2.5} className="ts" />
                     <Typography className="font-semibold text-xl">Recevoir par e-mail</Typography>
                   </Button>
-                  <Button tint="#12C958" onClick={() => startSending()}>
+                  <Button tint="#12C958" onClick={() => startSending()} customSound={aboutEndSound}>
                     <Airplay size={28} strokeWidth={2.5} className="ts" />
                     <Typography className="font-semibold text-xl">
                       Envoyer à l&apos;écran

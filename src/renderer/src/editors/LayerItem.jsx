@@ -3,6 +3,7 @@ import { tabs } from '../utils/tabs'
 import { symbols } from '../utils/symbols'
 import Button from '../components/Button'
 import { Reorder, useDragControls } from 'motion/react'
+import layerSound from '../assets/sounds/layer.mp3'
 
 function LayerItem({ item, i, layer, setLayer, setTab, deleteLayer, documentLength, isFixed }) {
   const controls = useDragControls()
@@ -41,6 +42,7 @@ function LayerItem({ item, i, layer, setLayer, setTab, deleteLayer, documentLeng
           setTab(item.type)
         }}
         tint={layer == i ? 'var(--primary)' : undefined}
+        customSound={layerSound}
       >
         {item.type === 'symbols' ? (
           <div className="ts">
@@ -65,6 +67,7 @@ function LayerItem({ item, i, layer, setLayer, setTab, deleteLayer, documentLeng
           className="w-16 p-0"
           onPointerDown={(e) => e.stopPropagation()}
           onClick={() => deleteLayer(i)}
+          customSound={layerSound}
         >
           <XIcon
             className="ts"

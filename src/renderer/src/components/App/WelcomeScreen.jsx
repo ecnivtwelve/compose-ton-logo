@@ -6,7 +6,7 @@ import packageJson from '../../../../../package.json'
 import background from '../../assets/img/background.svg'
 import logo from '../../assets/img/logo.png'
 import credits from '../../assets/img/credits.svg'
-import startSound from '../../assets/sounds/start.mp3'
+import upDoneSound from '../../assets/sounds/updone.ogg'
 
 function WelcomeScreen({
   showRestrictedControls,
@@ -24,23 +24,35 @@ function WelcomeScreen({
         className="flex flex-row gap-4 items-center justify-center"
         style={{
           position: 'absolute',
-          zIndex: 2,
+          zIndex: 20,
           bottom: 120
         }}
       >
-        <Button tint="#12C958" onClick={() => startEditing()} customSound={startSound}>
-          <PlayIcon className="ts" size={32} fill="#FFF" />
-          <p className="ts text-3xl font-semibold">Créer mon logo</p>
-        </Button>
-
-        <Button
-          tint="#D946EF"
-          onClick={() => setChallengeExplainerVisible(true)}
-          customSound={startSound}
+        <motion.div
+          initial={{ y: 400 }}
+          animate={{ y: 0 }}
+          transition={{ type: 'spring', duration: 0.8, bounce: 0.2, delay: 0.1 }}
         >
-          <Timer className="ts" size={32} />
-          <p className="ts text-3xl font-semibold">Mode Challenge</p>
-        </Button>
+          <Button tint="#12C958" onClick={() => startEditing()} customSound={upDoneSound}>
+            <PlayIcon className="ts" size={32} fill="#FFF" />
+            <p className="ts text-3xl font-semibold">Créer mon logo</p>
+          </Button>
+        </motion.div>
+
+        <motion.div
+          initial={{ y: 400 }}
+          animate={{ y: 0 }}
+          transition={{ type: 'spring', duration: 0.8, bounce: 0.2, delay: 0.2 }}
+        >
+          <Button
+            tint="#D946EF"
+            onClick={() => setChallengeExplainerVisible(true)}
+            customSound={upDoneSound}
+          >
+            <Timer className="ts" size={32} />
+            <p className="ts text-3xl font-semibold">Mode Challenge</p>
+          </Button>
+        </motion.div>
       </div>
 
       <AnimatePresence>
@@ -78,6 +90,22 @@ function WelcomeScreen({
         )}
       </AnimatePresence>
 
+      <motion.div
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          objectFit: 'cover',
+          zIndex: 9999,
+          backgroundColor: 'black',
+          pointerEvents: 'none'
+        }}
+        animate={{ opacity: 0 }}
+        transition={{ duration: 0.5 }}
+      />
+
       <Typography
         style={{
           position: 'absolute',
@@ -99,7 +127,7 @@ function WelcomeScreen({
         }}
         className="font-regular text-md"
       >
-        <span className="font-semibold">© 2025 IUT de Lannion — Département MMI — SAÉ 3.ALT</span>
+        <span className="font-semibold">© 2026 IUT de Lannion — Département MMI — SAÉ 3.ALT</span>
         <br />
         Roxane OMNES et Vince LINISE
       </Typography>
@@ -116,7 +144,10 @@ function WelcomeScreen({
         }}
       />
 
-      <img
+      <motion.img
+        initial={{ scale: 0 }}
+        animate={{ scale: 1 }}
+        transition={{ type: 'spring', duration: 1, bounce: 0.5 }}
         src={logo}
         style={{
           position: 'absolute',

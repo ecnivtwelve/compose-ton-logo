@@ -75,6 +75,8 @@ import VoitureBelleIcon from '../assets/svg/Voiture-belle.svg?react'
 import VoitureClassicIcon from '../assets/svg/Voiture-classic.svg?react'
 import RondContourIcon from '../assets/svg/rond-contour.svg?react'
 import RondRempliIcon from '../assets/svg/rond-rempli.svg?react'
+import HexagoneIcon from '../assets/svg/Hexagone.svg?react'
+import MmiIcon from '../assets/svg/mmi.svg?react'
 
 import TriskellIcon from '../assets/svg/triskell.svg?react'
 import HermineIcon from '../assets/svg/hermine.svg?react'
@@ -483,6 +485,11 @@ export const symbols = [
         name: 'Rond rempli',
         tags: 'forme, rond, rempli',
         svg: RondRempliIcon
+      },
+      {
+        name: 'Hexagone',
+        tags: 'forme, hexagone',
+        svg: HexagoneIcon
       }
     ]
   },
@@ -498,6 +505,11 @@ export const symbols = [
         name: 'Hermine',
         tags: 'hermine, bretagne',
         svg: HermineIcon
+      },
+      {
+        name: 'MMI',
+        tags: 'mmi, bretagne',
+        svg: MmiIcon
       }
     ]
   }

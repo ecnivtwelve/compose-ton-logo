@@ -48,7 +48,7 @@ export function ContentRenderer({ document, animated = true, simplified = false 
                       ? `drop-shadow(0px 0px ${layer.shadow}px rgba(0, 0, 0, 0.8))`
                       : 'none',
                     letterSpacing: `${layer.letterSpacing / 1000}em`,
-                    maxWidth: '550px',
+                    maxWidth: '570px',
                     whiteSpace: 'pre-wrap',
                     wordBreak: 'break-word',
                     textAlign: 'center',

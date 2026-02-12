@@ -15,7 +15,9 @@ function Alert({
   cancelTint = null,
   cancelText = 'Annuler',
   hideCancel = false,
-  customSound
+  customSound,
+  customConfirmSound,
+  customCancelSound
 }) {
   useEffect(() => {
     const audio = new Audio(customSound || confirmSound)
@@ -43,11 +45,11 @@ function Alert({
 
             <div className="flex flex-row items-center justify-center w-full gap-4 mt-2">
               {!hideCancel && (
-                <Button tint={cancelTint} onClick={onCancel}>
+                <Button tint={cancelTint} onClick={onCancel} customSound={customCancelSound}>
                   <p className="ts text-3xl font-semibold">{cancelText}</p>
                 </Button>
               )}
-              <Button tint={confirmTint} onClick={onConfirm}>
+              <Button tint={confirmTint} onClick={onConfirm} customSound={customConfirmSound}>
                 <p className="ts text-3xl font-semibold">{confirmText}</p>
               </Button>
             </div>

@@ -1,4 +1,7 @@
 import Alert from '../../effects/Alert'
+import requestSound from '../../assets/sounds/request.mp3'
+import errorSound from '../../assets/sounds/error.mp3'
+import cancelConfirmSound from '../../assets/sounds/cancel_confirm.mp3'
 
 function AppAlerts({
   inactivityAlertVisible,
@@ -21,7 +24,9 @@ function AppAlerts({
   setEmailSent,
   challengeFinishConfirmVisible,
   setChallengeFinishConfirmVisible,
-  setAboutToSave
+  setAboutToSave,
+  sendError,
+  setSendError
 }) {
   return (
     <>
@@ -33,6 +38,7 @@ function AppAlerts({
         confirmText="Oui, je suis encore là"
         cancelTint="#C52E2E"
         confirmTint="#12C958"
+        customSound={requestSound}
         onConfirm={() => {
           setInactivityAlertVisible(false)
           setInactivityCount(10)
@@ -51,6 +57,7 @@ function AppAlerts({
         title="Impossible d'envoyer le mail"
         message={mailError}
         confirmText="OK"
+        customSound={errorSound}
         onConfirm={() => {
           setMailError(null)
         }}
@@ -68,6 +75,7 @@ function AppAlerts({
             startChallenge()
           }
         }}
+        customConfirmSound={cancelConfirmSound}
         confirmText="Recommencer"
         onCancel={() => setResetConfirmVisible(false)}
       />
@@ -80,6 +88,7 @@ function AppAlerts({
           quitLogo()
           stopTimerAudio()
         }}
+        customConfirmSound={cancelConfirmSound}
         confirmText="Quitter"
         onCancel={() => setQuitConfirmVisible(false)}
       />
@@ -108,6 +117,18 @@ function AppAlerts({
         confirmTint="#12C958"
         cancelTint="#C52E2E"
         onCancel={() => setChallengeFinishConfirmVisible(false)}
+      />
+
+      <Alert
+        visible={!!sendError}
+        title="Oups !"
+        customSound={errorSound}
+        message={sendError}
+        onConfirm={() => {
+          setSendError(null)
+        }}
+        confirmText="OK"
+        hideCancel
       />
     </>
   )
