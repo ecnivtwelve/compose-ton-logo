@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 
 function DevTools() {
   const [showRestrictedControls, setShowRestrictedControls] = useState(false)
+  const runsInElectron = navigator.userAgent.toLowerCase().includes('electron')
+
 
   useEffect(() => {
     const checkConfig = async () => {
@@ -30,6 +32,8 @@ function DevTools() {
   const handleReset = () => {
     window.electron.ipcRenderer.send('relaunch-app')
   }
+
+  if (!runsInElectron) return null
 
   return (
     <>

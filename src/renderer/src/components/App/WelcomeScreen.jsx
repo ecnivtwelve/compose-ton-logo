@@ -7,19 +7,60 @@ import background from '../../assets/img/background.svg'
 import logo from '../../assets/img/logo.png'
 import credits from '../../assets/img/credits.svg'
 import upDoneSound from '../../assets/sounds/updone.ogg'
+import { useState } from 'react'
+import Intro from '../Intro'
 
 function WelcomeScreen({
   showRestrictedControls,
   startEditing,
   setChallengeExplainerVisible,
   challengeExplainerVisible,
-  startChallenge
+  startChallenge,
+  isIntro,
+  setIsIntro,
+  waitsForInput,
+  setWaitsForInput
 }) {
+  const runsInElectron = navigator.userAgent.toLowerCase().includes('electron')
+
+  if (waitsForInput && !runsInElectron) {
+    return (
+      <div
+        className="w-full h-full flex items-center justify-center bg-black"
+        onClick={() => setWaitsForInput(false)}
+      >
+        <div className='w-48 h-48 flex items-center justify-center bg-[#FFFFFF45] rounded-full hover:bg-[#FFFFFF77] transition-colors cursor-pointer active:bg-[#FFFFFF99]'>
+          <PlayIcon size={128} fill='white' stroke='none' />
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div
       className="w-full h-full flex items-center justify-center bg-black"
     // onClick={() => startEditing()}
     >
+      {!runsInElectron && (
+        <AnimatePresence>
+          {isIntro &&
+            <div
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                zIndex: 99999999,
+                width: '100%',
+                height: '100%',
+                backgroundColor: 'black'
+              }}
+            >
+              <Intro onEnd={() => setIsIntro(false)} />
+            </div>
+          }
+        </AnimatePresence>
+      )}
+
       <div
         className="flex flex-row gap-4 items-center justify-center"
         style={{
@@ -157,15 +198,17 @@ function WelcomeScreen({
         }}
       />
 
-      <motion.img
-        src={background}
-        alt=""
-        style={{
-          position: 'absolute',
-          zIndex: 1
-        }}
-        className="ctl-rotateForever"
-      />
+      {runsInElectron || !isIntro && (
+        <motion.img
+          src={background}
+          alt=""
+          style={{
+            position: 'absolute',
+            zIndex: 1
+          }}
+          className="ctl-rotateForever"
+        />
+      )}
     </div>
   )
 }

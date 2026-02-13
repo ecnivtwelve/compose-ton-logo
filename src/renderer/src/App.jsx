@@ -363,6 +363,11 @@ function App() {
     setAddNewCurrentLayerCount((prev) => prev + 1)
   }
 
+  const runsInElectron = navigator.userAgent.toLowerCase().includes('electron')
+
+  const [isIntro, setIsIntro] = useState(!runsInElectron)
+  const [waitsForInput, setWaitsForInput] = useState(!runsInElectron)
+
   if (!editingMode) {
     return (
       <WelcomeScreen
@@ -371,6 +376,10 @@ function App() {
         setChallengeExplainerVisible={setChallengeExplainerVisible}
         challengeExplainerVisible={challengeExplainerVisible}
         startChallenge={startChallenge}
+        isIntro={isIntro}
+        setIsIntro={setIsIntro}
+        waitsForInput={waitsForInput}
+        setWaitsForInput={setWaitsForInput}
       />
     )
   }
@@ -632,10 +641,12 @@ function App() {
                       </Typography>
                     </Button>
                   )}
-                  <Button tint="#0055FF" onClick={() => emailPopup()}>
-                    <Mail size={28} strokeWidth={2.5} className="ts" />
-                    <Typography className="font-semibold text-xl">Recevoir par e-mail</Typography>
-                  </Button>
+                  {runsInElectron && (
+                    <Button tint="#0055FF" onClick={() => emailPopup()}>
+                      <Mail size={28} strokeWidth={2.5} className="ts" />
+                      <Typography className="font-semibold text-xl">Recevoir par e-mail</Typography>
+                    </Button>
+                  )}
                   <Button tint="#12C958" onClick={() => startSending()} customSound={aboutEndSound}>
                     <Airplay size={28} strokeWidth={2.5} className="ts" />
                     <Typography className="font-semibold text-xl">

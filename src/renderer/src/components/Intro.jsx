@@ -51,6 +51,7 @@ const Intro = ({ onEnd }) => {
       exit={{ opacity: 0, transition: { duration: 1 } }}
     >
       <video
+        playsInline
         ref={ctlRevRef}
         src={ctlRev}
         onPlaying={handlePlay}
@@ -65,6 +66,7 @@ const Intro = ({ onEnd }) => {
       />
 
       <video
+        playsInline
         ref={introVideoRef}
         src={introVideo}
         style={{
