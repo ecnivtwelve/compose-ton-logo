@@ -7,7 +7,7 @@ Compose ton Logo est un moyen simple de s'essayer à la création graphique. À 
 
 Il a été créé en groupe avec Roxane Omnes, qui s'est occupée des recherches UX et de la conception de l'habillage.
 
-[Essayer en ligne »](https://compose-ton-logo.vincelinise.com/) — [Page descriptive du projet »](https://vincelinise.com/projects/compose-ton-logo)
+[Essayer en ligne »](https://compose-ton-logo.vincelinise.com/) • [Page descriptive du projet »](https://vincelinise.com/projects/compose-ton-logo)
 
 ## Démo
 [ctl-demo.webm](https://github.com/user-attachments/assets/75cbae69-f8e5-4c94-a99e-2a2b3afc6f13)
