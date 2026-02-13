@@ -19,6 +19,7 @@ import doneSound from './assets/sounds/ctl_done.ogg'
 import aboutEndSound from './assets/sounds/about_end.ogg'
 import { tabs } from './utils/tabs'
 import upLight from './assets/img/up_light.png'
+import consts from './consts.json'
 
 import WelcomeScreen from './components/App/WelcomeScreen'
 import RecapModal from './components/App/RecapModal'
@@ -179,7 +180,7 @@ function App() {
     const mailgun = new Mailgun(FormData)
     const mg = mailgun.client({
       username: 'api',
-      key: 'dd835a51f28fb48c03778236ee6975a3-42b8ce75-0de63f49',
+      key: consts.mailgun_api_key,
       url: 'https://api.eu.mailgun.net'
     })
     try {
