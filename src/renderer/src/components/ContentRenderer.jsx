@@ -20,21 +20,65 @@ export function ContentRenderer({
   simplified = false,
   selectedLayerIndex = null,
   editable = false,
-  onLayerPointerDown
+  onLayerPointerDown,
+  onResizeHandlePointerDown
 }) {
-  const renderLayerFrame = (layer, index, child) => {
-    const isSelected = editable && selectedLayerIndex === index
+  const renderLayerFrame = (layer, index, child, options = {}) => {
+    const selectable = options.selectable ?? true
+    const isSelected = selectable && editable && selectedLayerIndex === index
+    const padding = options.padding ?? 8
+    const borderRadius = options.borderRadius ?? 12
+    const cursor = options.cursor ?? (editable ? 'grab' : 'default')
+    const handles = [
+      { key: 'nw', left: -6, top: -6, cursor: 'nwse-resize' },
+      { key: 'n', left: '50%', top: -6, transform: 'translateX(-50%)', cursor: 'ns-resize' },
+      { key: 'ne', right: -6, top: -6, cursor: 'nesw-resize' },
+      { key: 'e', right: -6, top: '50%', transform: 'translateY(-50%)', cursor: 'ew-resize' },
+      { key: 'se', right: -6, bottom: -6, cursor: 'nwse-resize' },
+      { key: 's', left: '50%', bottom: -6, transform: 'translateX(-50%)', cursor: 'ns-resize' },
+      { key: 'sw', left: -6, bottom: -6, cursor: 'nesw-resize' },
+      { key: 'w', left: -6, top: '50%', transform: 'translateY(-50%)', cursor: 'ew-resize' }
+    ]
+
     return (
       <div
         style={{
-          border: isSelected ? '2px solid var(--primary)' : '2px solid transparent',
-          borderRadius: 12,
-          padding: 8,
-          cursor: editable ? 'grab' : 'default',
-          userSelect: 'none'
+          border: isSelected ? '4px solid var(--primary)' : '2px solid transparent',
+          borderRadius,
+          padding,
+          cursor,
+          userSelect: 'none',
+          touchAction: 'none',
+          position: 'relative',
+          boxSizing: 'border-box'
         }}
       >
         {child}
+        {isSelected &&
+          handles.map((handle) => (
+            <button
+              key={`${layer.id}-${handle.key}`}
+              type="button"
+              onPointerDown={(event) => {
+                event.preventDefault()
+                event.stopPropagation()
+                onResizeHandlePointerDown?.(event, layer, index, handle.key)
+              }}
+              style={{
+                position: 'absolute',
+                width: 12,
+                height: 12,
+                borderRadius: 999,
+                border: '2px solid var(--primary)',
+                background: '#fff',
+                padding: 0,
+                zIndex: 10,
+                zoom: 2,
+                touchAction: 'none',
+                ...handle
+              }}
+            />
+          ))}
       </div>
     )
   }
@@ -93,7 +137,8 @@ export function ContentRenderer({
                   style={{
                     position: 'absolute',
                     transform: `scaleX(${layer.width / 100}) rotate(${layer.rotation ?? 0}deg) translateX(${layer.x ?? 0}px) translateY(${layer.y ?? 0}px)`,
-                    pointerEvents: editable ? 'auto' : 'none'
+                    pointerEvents: editable ? 'auto' : 'none',
+                    touchAction: 'none'
                   }}
                   onPointerDown={(event) => onLayerPointerDown?.(event, layer, index)}
                 >
@@ -149,7 +194,8 @@ export function ContentRenderer({
                   style={{
                     transform: `rotate(${layer.rotation ?? 0}deg) translateX(${layer.x ?? 0}px) translateY(${layer.y ?? 0}px)`,
                     position: 'absolute',
-                    pointerEvents: editable ? 'auto' : 'none'
+                    pointerEvents: editable ? 'auto' : 'none',
+                    touchAction: 'none'
                   }}
                   onPointerDown={(event) => onLayerPointerDown?.(event, layer, index)}
                 >
@@ -172,37 +218,48 @@ export function ContentRenderer({
             } else if (layer.type == 'background') {
               const filename = layer.pattern ? layer.pattern.split('/').pop() : null
               const pattern = filename ? patternsByFilename[filename] : null
-              const isSelected = editable && selectedLayerIndex === index
+              const backgroundElement = (
+                <div
+                  style={{
+                    borderRadius: layer.radius,
+                    width: layer.size,
+                    height: layer.size,
+                    background: layer.gradient
+                      ? `linear-gradient(${layer.gradientDirection ?? 0}deg, ${layer.color}, ${layer.color2 ?? '#ffffff'})`
+                      : layer.color,
+                    visibility: layer.enabled ? 'visible' : 'hidden',
+                    overflow: 'hidden'
+                  }}
+                >
+                  {pattern && (
+                    <img
+                      src={pattern.default}
+                      style={{
+                        opacity: layer.patternOpacity / 100,
+                        mixBlendMode: layer.blendModeEnabled ? layer.blendMode : undefined,
+                        filter: layer.blendModeEnabled ? `saturate(0)` : undefined
+                      }}
+                    />
+                  )}
+                </div>
+              )
 
               return (
                 <React.Fragment key={layer.id}>
                   <div
                     data-preview-layer="true"
                     style={{
-                      borderRadius: layer.radius,
-                      width: layer.size,
-                      height: layer.size,
-                      background: layer.gradient
-                        ? `linear-gradient(${layer.gradientDirection ?? 0}deg, ${layer.color}, ${layer.color2 ?? '#ffffff'})`
-                        : layer.color,
                       position: 'absolute',
-                      visibility: layer.enabled ? 'visible' : 'hidden',
-                      overflow: 'hidden',
-                      pointerEvents: editable ? 'auto' : 'none',
-                      border: isSelected ? '2px solid var(--primary)' : undefined
+                      pointerEvents: editable ? 'auto' : 'none'
                     }}
                     onPointerDown={(event) => onLayerPointerDown?.(event, layer, index)}
                   >
-                    {pattern && (
-                      <img
-                        src={pattern.default}
-                        style={{
-                          opacity: layer.patternOpacity / 100,
-                          mixBlendMode: layer.blendModeEnabled ? layer.blendMode : undefined,
-                          filter: layer.blendModeEnabled ? `saturate(0)` : undefined
-                        }}
-                      />
-                    )}
+                    {renderLayerFrame(layer, index, backgroundElement, {
+                      padding: 0,
+                      borderRadius: layer.radius,
+                      cursor: editable ? 'pointer' : 'default',
+                      selectable: false
+                    })}
                   </div>
                 </React.Fragment>
               )

@@ -10,7 +10,9 @@ function ContentPreview({ document, setDocument, setLayer, setTab, interactive =
   const playerRef = useRef(null)
   const isFirstRender = useRef(true)
   const prevFingerprintRef = useRef('')
+  const previewRef = useRef(null)
   const dragRef = useRef(null)
+  const resizeRef = useRef(null)
   const [previewSelectedLayerIndex, setPreviewSelectedLayerIndex] = useState(null)
 
   const bigThingsFingerprint = JSON.stringify(
@@ -53,9 +55,23 @@ function ContentPreview({ document, setDocument, setLayer, setTab, interactive =
   function handlePointerMove(event) {
     if (!dragRef.current) return
 
-    const { index, startX, startY, originX, originY } = dragRef.current
-    const deltaX = event.clientX - startX
-    const deltaY = event.clientY - startY
+    const {
+      index,
+      pointerId,
+      startX,
+      startY,
+      originX,
+      originY,
+      minDeltaX,
+      maxDeltaX,
+      minDeltaY,
+      maxDeltaY
+    } = dragRef.current
+    if (event.pointerId !== pointerId) return
+    const rawDeltaX = event.clientX - startX
+    const rawDeltaY = event.clientY - startY
+    const deltaX = clamp(rawDeltaX, minDeltaX, maxDeltaX)
+    const deltaY = clamp(rawDeltaY, minDeltaY, maxDeltaY)
 
     setDocument((prev) => {
       const current = prev[index]
@@ -76,10 +92,93 @@ function ContentPreview({ document, setDocument, setLayer, setTab, interactive =
     })
   }
 
-  function handlePointerUp() {
+  function clamp(value, min, max) {
+    return Math.min(max, Math.max(min, value))
+  }
+
+  function handleResizePointerMove(event) {
+    if (!resizeRef.current) return
+
+    const { index, handle, pointerId, startX, startY, originSize } = resizeRef.current
+    if (event.pointerId !== pointerId) return
+    const deltaX = event.clientX - startX
+    const deltaY = event.clientY - startY
+    const horizontalDelta = handle.includes('e') ? deltaX : handle.includes('w') ? -deltaX : 0
+    const verticalDelta = handle.includes('s') ? deltaY : handle.includes('n') ? -deltaY : 0
+
+    setDocument((prev) => {
+      const current = prev[index]
+      if (!current) return prev
+
+      let nextLayer = current
+
+      if (current.type === 'text') {
+        let nextSize = current.size ?? originSize
+        const majorDelta =
+          horizontalDelta !== 0 && verticalDelta !== 0
+            ? (horizontalDelta + verticalDelta) / 2
+            : horizontalDelta !== 0
+              ? horizontalDelta
+              : verticalDelta
+        const scale = Math.max(0.2, 1 + majorDelta / 200)
+        nextSize = clamp(Math.round(originSize * scale), 32, 420)
+
+        if ((current.size ?? 64) === nextSize) return prev
+        nextLayer = { ...current, size: nextSize }
+      } else if (current.type === 'symbols') {
+        const majorDelta =
+          horizontalDelta !== 0 && verticalDelta !== 0
+            ? (horizontalDelta + verticalDelta) / 2
+            : horizontalDelta !== 0
+              ? horizontalDelta
+              : verticalDelta
+        const scale = Math.max(0.2, 1 + majorDelta / 200)
+        const nextSize = clamp(Math.round(originSize * scale), 50, 600)
+
+        if ((current.size ?? originSize) === nextSize) return prev
+        nextLayer = {
+          ...current,
+          size: nextSize
+        }
+      }
+
+      const updated = [...prev]
+      updated[index] = nextLayer
+      return updated
+    })
+  }
+
+  function handlePointerUp(event) {
+    if (event && dragRef.current?.pointerId !== event.pointerId) return
+    if (dragRef.current?.target?.releasePointerCapture && dragRef.current.pointerId !== undefined) {
+      try {
+        dragRef.current.target.releasePointerCapture(dragRef.current.pointerId)
+      } catch (error) {
+        void error
+      }
+    }
     dragRef.current = null
     window.removeEventListener('pointermove', handlePointerMove)
     window.removeEventListener('pointerup', handlePointerUp)
+    window.removeEventListener('pointercancel', handlePointerUp)
+  }
+
+  function handleResizePointerUp(event) {
+    if (event && resizeRef.current?.pointerId !== event.pointerId) return
+    if (
+      resizeRef.current?.target?.releasePointerCapture &&
+      resizeRef.current.pointerId !== undefined
+    ) {
+      try {
+        resizeRef.current.target.releasePointerCapture(resizeRef.current.pointerId)
+      } catch (error) {
+        void error
+      }
+    }
+    resizeRef.current = null
+    window.removeEventListener('pointermove', handleResizePointerMove)
+    window.removeEventListener('pointerup', handleResizePointerUp)
+    window.removeEventListener('pointercancel', handleResizePointerUp)
   }
 
   const handleLayerPointerDown = (event, item, index) => {
@@ -92,17 +191,74 @@ function ContentPreview({ document, setDocument, setLayer, setTab, interactive =
     if (item.type === 'background' || event.button !== 0) return
 
     event.preventDefault()
+    event.stopPropagation()
+    const layerElement = event.currentTarget
+    const previewElement = previewRef.current
+    const layerRect = layerElement.getBoundingClientRect()
+    const previewRect = previewElement?.getBoundingClientRect()
+    const minDeltaX = previewRect ? previewRect.left - layerRect.left : Number.NEGATIVE_INFINITY
+    const maxDeltaX = previewRect ? previewRect.right - layerRect.right : Number.POSITIVE_INFINITY
+    const minDeltaY = previewRect ? previewRect.top - layerRect.top : Number.NEGATIVE_INFINITY
+    const maxDeltaY = previewRect ? previewRect.bottom - layerRect.bottom : Number.POSITIVE_INFINITY
+    if (layerElement.setPointerCapture && event.pointerId !== undefined) {
+      try {
+        layerElement.setPointerCapture(event.pointerId)
+      } catch (error) {
+        void error
+      }
+    }
 
     dragRef.current = {
       index,
+      pointerId: event.pointerId,
       startX: event.clientX,
       startY: event.clientY,
       originX: item.x ?? 0,
-      originY: item.y ?? 0
+      originY: item.y ?? 0,
+      minDeltaX,
+      maxDeltaX,
+      minDeltaY,
+      maxDeltaY,
+      target: layerElement
     }
 
     window.addEventListener('pointermove', handlePointerMove)
     window.addEventListener('pointerup', handlePointerUp)
+    window.addEventListener('pointercancel', handlePointerUp)
+  }
+
+  const handleResizeHandlePointerDown = (event, item, index, handle) => {
+    if (!interactive || event.button !== 0) return
+    if (item.type === 'background') return
+
+    setPreviewSelectedLayerIndex(index)
+    setLayer(index)
+    setTab(item.type)
+    handlePointerUp()
+    event.preventDefault()
+    event.stopPropagation()
+    const handleElement = event.currentTarget
+    if (handleElement.setPointerCapture && event.pointerId !== undefined) {
+      try {
+        handleElement.setPointerCapture(event.pointerId)
+      } catch (error) {
+        void error
+      }
+    }
+
+    resizeRef.current = {
+      index,
+      handle,
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      originSize: item.size ?? (item.type === 'text' ? 64 : 200),
+      target: handleElement
+    }
+
+    window.addEventListener('pointermove', handleResizePointerMove)
+    window.addEventListener('pointerup', handleResizePointerUp)
+    window.addEventListener('pointercancel', handleResizePointerUp)
   }
 
   const handlePreviewPointerDown = (event) => {
@@ -118,7 +274,9 @@ function ContentPreview({ document, setDocument, setLayer, setTab, interactive =
   return (
     <>
       <div
+        ref={previewRef}
         className="w-full h-full flex items-center justify-center overflow-hidden position-relative"
+        style={{ touchAction: 'none' }}
         onPointerDown={handlePreviewPointerDown}
       >
         <Player
@@ -142,6 +300,7 @@ function ContentPreview({ document, setDocument, setLayer, setTab, interactive =
           editable={interactive}
           selectedLayerIndex={activePreviewSelectedLayerIndex}
           onLayerPointerDown={handleLayerPointerDown}
+          onResizeHandlePointerDown={handleResizeHandlePointerDown}
         />
       </div>
     </>
