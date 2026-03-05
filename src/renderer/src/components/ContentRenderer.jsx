@@ -21,7 +21,8 @@ export function ContentRenderer({
   selectedLayerIndex = null,
   editable = false,
   onLayerPointerDown,
-  onResizeHandlePointerDown
+  onResizeHandlePointerDown,
+  onRotateHandlePointerDown
 }) {
   const renderLayerFrame = (layer, index, child, options = {}) => {
     const selectable = options.selectable ?? true
@@ -79,6 +80,32 @@ export function ContentRenderer({
               }}
             />
           ))}
+        {isSelected && (
+          <button
+            type="button"
+            onPointerDown={(event) => {
+              event.preventDefault()
+              event.stopPropagation()
+              onRotateHandlePointerDown?.(event, layer, index)
+            }}
+            style={{
+              position: 'absolute',
+              left: '50%',
+              top: -26,
+              width: 14,
+              height: 14,
+              borderRadius: 999,
+              border: '2px solid #0099FF',
+              background: '#fff',
+              padding: 0,
+              zIndex: 11,
+              zoom: 1.5,
+              transform: 'translateX(-50%)',
+              cursor: 'grab',
+              touchAction: 'none'
+            }}
+          />
+        )}
       </div>
     )
   }

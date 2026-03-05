@@ -13,6 +13,7 @@ function ContentPreview({ document, setDocument, setLayer, setTab, interactive =
   const previewRef = useRef(null)
   const dragRef = useRef(null)
   const resizeRef = useRef(null)
+  const rotateRef = useRef(null)
   const [previewSelectedLayerIndex, setPreviewSelectedLayerIndex] = useState(null)
 
   const bigThingsFingerprint = JSON.stringify(
@@ -148,6 +149,30 @@ function ContentPreview({ document, setDocument, setLayer, setTab, interactive =
     })
   }
 
+  function handleRotatePointerMove(event) {
+    if (!rotateRef.current) return
+
+    const { index, pointerId, originRotation, centerX, centerY, startAngle } = rotateRef.current
+    if (event.pointerId !== pointerId) return
+
+    const currentAngle = Math.atan2(event.clientY - centerY, event.clientX - centerX)
+    const deltaAngle = ((currentAngle - startAngle) * 180) / Math.PI
+    const normalizedRotation = Math.round((((originRotation + deltaAngle) % 360) + 360) % 360)
+
+    setDocument((prev) => {
+      const current = prev[index]
+      if (!current || current.type === 'background') return prev
+      if ((current.rotation ?? 0) === normalizedRotation) return prev
+
+      const updated = [...prev]
+      updated[index] = {
+        ...current,
+        rotation: normalizedRotation
+      }
+      return updated
+    })
+  }
+
   function handlePointerUp(event) {
     if (event && dragRef.current?.pointerId !== event.pointerId) return
     if (dragRef.current?.target?.releasePointerCapture && dragRef.current.pointerId !== undefined) {
@@ -181,12 +206,32 @@ function ContentPreview({ document, setDocument, setLayer, setTab, interactive =
     window.removeEventListener('pointercancel', handleResizePointerUp)
   }
 
+  function handleRotatePointerUp(event) {
+    if (event && rotateRef.current?.pointerId !== event.pointerId) return
+    if (
+      rotateRef.current?.target?.releasePointerCapture &&
+      rotateRef.current.pointerId !== undefined
+    ) {
+      try {
+        rotateRef.current.target.releasePointerCapture(rotateRef.current.pointerId)
+      } catch (error) {
+        void error
+      }
+    }
+    rotateRef.current = null
+    window.removeEventListener('pointermove', handleRotatePointerMove)
+    window.removeEventListener('pointerup', handleRotatePointerUp)
+    window.removeEventListener('pointercancel', handleRotatePointerUp)
+  }
+
   const handleLayerPointerDown = (event, item, index) => {
     if (!interactive) return
 
     setPreviewSelectedLayerIndex(index)
     setLayer(index)
     setTab(item.type)
+    handleResizePointerUp()
+    handleRotatePointerUp()
 
     if (item.type === 'background' || event.button !== 0) return
 
@@ -235,6 +280,7 @@ function ContentPreview({ document, setDocument, setLayer, setTab, interactive =
     setLayer(index)
     setTab(item.type)
     handlePointerUp()
+    handleRotatePointerUp()
     event.preventDefault()
     event.stopPropagation()
     const handleElement = event.currentTarget
@@ -259,6 +305,48 @@ function ContentPreview({ document, setDocument, setLayer, setTab, interactive =
     window.addEventListener('pointermove', handleResizePointerMove)
     window.addEventListener('pointerup', handleResizePointerUp)
     window.addEventListener('pointercancel', handleResizePointerUp)
+  }
+
+  const handleRotateHandlePointerDown = (event, item, index) => {
+    if (!interactive || event.button !== 0) return
+    if (item.type === 'background') return
+
+    setPreviewSelectedLayerIndex(index)
+    setLayer(index)
+    setTab(item.type)
+    handlePointerUp()
+    handleResizePointerUp()
+    event.preventDefault()
+    event.stopPropagation()
+    const rotateHandleElement = event.currentTarget
+    const layerElement = rotateHandleElement.closest('[data-preview-layer="true"]')
+    if (!layerElement) return
+    const layerRect = layerElement.getBoundingClientRect()
+    const centerX = layerRect.left + layerRect.width / 2
+    const centerY = layerRect.top + layerRect.height / 2
+    const startAngle = Math.atan2(event.clientY - centerY, event.clientX - centerX)
+
+    if (rotateHandleElement.setPointerCapture && event.pointerId !== undefined) {
+      try {
+        rotateHandleElement.setPointerCapture(event.pointerId)
+      } catch (error) {
+        void error
+      }
+    }
+
+    rotateRef.current = {
+      index,
+      pointerId: event.pointerId,
+      originRotation: item.rotation ?? 0,
+      centerX,
+      centerY,
+      startAngle,
+      target: rotateHandleElement
+    }
+
+    window.addEventListener('pointermove', handleRotatePointerMove)
+    window.addEventListener('pointerup', handleRotatePointerUp)
+    window.addEventListener('pointercancel', handleRotatePointerUp)
   }
 
   const handlePreviewPointerDown = (event) => {
@@ -301,6 +389,7 @@ function ContentPreview({ document, setDocument, setLayer, setTab, interactive =
           selectedLayerIndex={activePreviewSelectedLayerIndex}
           onLayerPointerDown={handleLayerPointerDown}
           onResizeHandlePointerDown={handleResizeHandlePointerDown}
+          onRotateHandlePointerDown={handleRotateHandlePointerDown}
         />
       </div>
     </>
