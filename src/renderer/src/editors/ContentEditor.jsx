@@ -118,17 +118,6 @@ function ContentEditor({ document, setDocument, layer, tab }) {
           </motion.div>
         </AnimatePresence>
       </motion.div>
-
-      {scrollIndicator.visible && (
-        <div className="pointer-events-none absolute right-1 top-6 bottom-10 w-[3px] rounded-full bg-black/0 opacity-20">
-          <div
-            className="absolute -left-1 w-2 h-48 rounded-full bg-white"
-            style={{
-              top: `calc(${scrollIndicator.progress} * (100% - 12rem))`
-            }}
-          />
-        </div>
-      )}
     </div>
   )
 }

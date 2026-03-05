@@ -590,7 +590,14 @@ function App() {
                   : { duration: 0 }
               }
             >
-              <ContentPreview document={document} />
+              <ContentPreview
+                document={document}
+                setDocument={setDocument}
+                layer={layer}
+                setLayer={setLayer}
+                setTab={setTab}
+                interactive={!aboutToSave}
+              />
             </motion.div>
 
             <AnimatePresence>

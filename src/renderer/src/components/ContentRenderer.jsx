@@ -14,7 +14,31 @@ Object.keys(allPatterns).forEach((key) => {
   patternsByFilename[filename] = allPatterns[key]
 })
 
-export function ContentRenderer({ document, animated = true, simplified = false }) {
+export function ContentRenderer({
+  document,
+  animated = true,
+  simplified = false,
+  selectedLayerIndex = null,
+  editable = false,
+  onLayerPointerDown
+}) {
+  const renderLayerFrame = (layer, index, child) => {
+    const isSelected = editable && selectedLayerIndex === index
+    return (
+      <div
+        style={{
+          border: isSelected ? '2px solid var(--primary)' : '2px solid transparent',
+          borderRadius: 12,
+          padding: 8,
+          cursor: editable ? 'grab' : 'default',
+          userSelect: 'none'
+        }}
+      >
+        {child}
+      </div>
+    )
+  }
+
   return (
     <>
       <div
@@ -36,7 +60,7 @@ export function ContentRenderer({ document, animated = true, simplified = false 
               : 'none'
           }}
         >
-          {document.map((layer) => {
+          {document.map((layer, index) => {
             if (layer.type == 'text') {
               const textElement = (
                 <p
@@ -65,10 +89,13 @@ export function ContentRenderer({ document, animated = true, simplified = false 
               return (
                 <div
                   key={layer.id}
+                  data-preview-layer="true"
                   style={{
                     position: 'absolute',
-                    transform: `scaleX(${layer.width / 100}) rotate(${layer.rotation ?? 0}deg) translateX(${layer.x ?? 0}px) translateY(${layer.y ?? 0}px)`
+                    transform: `scaleX(${layer.width / 100}) rotate(${layer.rotation ?? 0}deg) translateX(${layer.x ?? 0}px) translateY(${layer.y ?? 0}px)`,
+                    pointerEvents: editable ? 'auto' : 'none'
                   }}
+                  onPointerDown={(event) => onLayerPointerDown?.(event, layer, index)}
                 >
                   {animated ? (
                     <AnimatePresence mode="wait">
@@ -78,11 +105,11 @@ export function ContentRenderer({ document, animated = true, simplified = false 
                         transition={{ type: 'spring', bounce: 0.7, duration: 0.7 }}
                         key={layer.font}
                       >
-                        {textElement}
+                        {renderLayerFrame(layer, index, textElement)}
                       </motion.div>
                     </AnimatePresence>
                   ) : (
-                    textElement
+                    renderLayerFrame(layer, index, textElement)
                   )}
                 </div>
               )
@@ -118,10 +145,13 @@ export function ContentRenderer({ document, animated = true, simplified = false 
               return (
                 <div
                   key={layer.id}
+                  data-preview-layer="true"
                   style={{
                     transform: `rotate(${layer.rotation ?? 0}deg) translateX(${layer.x ?? 0}px) translateY(${layer.y ?? 0}px)`,
-                    position: 'absolute'
+                    position: 'absolute',
+                    pointerEvents: editable ? 'auto' : 'none'
                   }}
+                  onPointerDown={(event) => onLayerPointerDown?.(event, layer, index)}
                 >
                   {animated ? (
                     <AnimatePresence mode="wait">
@@ -131,21 +161,23 @@ export function ContentRenderer({ document, animated = true, simplified = false 
                         transition={{ type: 'spring', bounce: 0.7, duration: 0.7 }}
                         key={layer.symbol.name}
                       >
-                        {iconElement}
+                        {renderLayerFrame(layer, index, iconElement)}
                       </motion.div>
                     </AnimatePresence>
                   ) : (
-                    iconElement
+                    renderLayerFrame(layer, index, iconElement)
                   )}
                 </div>
               )
             } else if (layer.type == 'background') {
               const filename = layer.pattern ? layer.pattern.split('/').pop() : null
               const pattern = filename ? patternsByFilename[filename] : null
+              const isSelected = editable && selectedLayerIndex === index
 
               return (
                 <React.Fragment key={layer.id}>
                   <div
+                    data-preview-layer="true"
                     style={{
                       borderRadius: layer.radius,
                       width: layer.size,
@@ -155,8 +187,11 @@ export function ContentRenderer({ document, animated = true, simplified = false 
                         : layer.color,
                       position: 'absolute',
                       visibility: layer.enabled ? 'visible' : 'hidden',
-                      overflow: 'hidden'
+                      overflow: 'hidden',
+                      pointerEvents: editable ? 'auto' : 'none',
+                      border: isSelected ? '2px solid var(--primary)' : undefined
                     }}
+                    onPointerDown={(event) => onLayerPointerDown?.(event, layer, index)}
                   >
                     {pattern && (
                       <img
