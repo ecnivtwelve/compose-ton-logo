@@ -4,7 +4,34 @@ import PatternSelector from '../../components/selectors/PatternSelector'
 import Slider from '../../components/ui/Slider'
 import { backgroundDefaultState } from '../../utils/consts'
 
+const allPatterns = import.meta.glob('../../assets/img/patterns/*.png', {
+  eager: true,
+  query: '?url'
+})
+const blendFallbackColors = [
+  '#FF3E11',
+  '#FFD700',
+  '#ADFF2F',
+  '#00FF7F',
+  '#00E5FF',
+  '#BF00FF',
+  '#813f0c',
+  '#fff6a1',
+  '#acb70e',
+  '#18aa02',
+  '#427ae3',
+  '#e64490'
+]
+
 function BackgroundEditor({ content, setLayer }) {
+  const defaultPattern = Object.keys(allPatterns)[0] ?? null
+  const isBlackOrWhite = (color) => {
+    const normalized = (color ?? '').toLowerCase()
+    return normalized === '#000000' || normalized === '#ffffff'
+  }
+  const getRandomBlendFallbackColor = () =>
+    blendFallbackColors[Math.floor(Math.random() * blendFallbackColors.length)]
+
   const setLayerBg = (layer) => {
     if (!content.enabled) {
       setLayer({ ...layer, enabled: true })
@@ -98,7 +125,25 @@ function BackgroundEditor({ content, setLayer }) {
         <div className="flex flex-row gap-4 items-center">
           <Checkbox
             checked={content.blendModeEnabled}
-            onChange={(blendModeEnabled) => setLayerBg({ ...content, blendModeEnabled })}
+            onChange={(blendModeEnabled) => {
+              const nextColor =
+                blendModeEnabled && isBlackOrWhite(content.color)
+                  ? getRandomBlendFallbackColor()
+                  : content.color
+              const nextColor2 =
+                blendModeEnabled && content.gradient && isBlackOrWhite(content.color2)
+                  ? getRandomBlendFallbackColor()
+                  : content.color2
+
+              setLayerBg({
+                ...content,
+                blendModeEnabled,
+                pattern:
+                  blendModeEnabled && !content.pattern ? defaultPattern : content.pattern,
+                color: nextColor,
+                color2: nextColor2
+              })
+            }}
           />
           <div>
             <p className="ts text-xl font-semibold w-full">Mode de fusion</p>

@@ -163,7 +163,7 @@ export function ContentRenderer({
                   data-preview-layer="true"
                   style={{
                     position: 'absolute',
-                    transform: `scaleX(${layer.width / 100}) rotate(${layer.rotation ?? 0}deg) translateX(${layer.x ?? 0}px) translateY(${layer.y ?? 0}px)`,
+                    transform: `translateX(${layer.x ?? 0}px) translateY(${layer.y ?? 0}px) rotate(${layer.rotation ?? 0}deg) scaleX(${layer.width / 100})`,
                     pointerEvents: editable ? 'auto' : 'none',
                     touchAction: 'none'
                   }}
@@ -219,7 +219,7 @@ export function ContentRenderer({
                   key={layer.id}
                   data-preview-layer="true"
                   style={{
-                    transform: `rotate(${layer.rotation ?? 0}deg) translateX(${layer.x ?? 0}px) translateY(${layer.y ?? 0}px)`,
+                    transform: `translateX(${layer.x ?? 0}px) translateY(${layer.y ?? 0}px) rotate(${layer.rotation ?? 0}deg)`,
                     position: 'absolute',
                     pointerEvents: editable ? 'auto' : 'none',
                     touchAction: 'none'
