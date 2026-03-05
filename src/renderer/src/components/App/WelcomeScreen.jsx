@@ -198,17 +198,15 @@ function WelcomeScreen({
         }}
       />
 
-      {runsInElectron || !isIntro && (
-        <motion.img
-          src={background}
-          alt=""
-          style={{
-            position: 'absolute',
-            zIndex: 1
-          }}
-          className="ctl-rotateForever"
-        />
-      )}
+      <motion.img
+        src={background}
+        alt=""
+        style={{
+          position: 'absolute',
+          zIndex: 1
+        }}
+        className="ctl-rotateForever"
+      />
     </div>
   )
 }
