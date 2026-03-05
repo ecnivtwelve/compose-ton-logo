@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'motion/react'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import TextEditor from './content/TextEditor'
 import SymbolEditor from './content/SymbolEditor'
@@ -8,6 +8,7 @@ import BackgroundEditor from './content/BackgroundEditor'
 function ContentEditor({ document, setDocument, layer, tab }) {
   const content = document[layer]
   const scrollRef = useRef(null)
+  const [scrollIndicator, setScrollIndicator] = useState({ progress: 0, visible: false })
 
   const prevTabRef = useRef(tab)
   useEffect(() => {
@@ -32,6 +33,33 @@ function ContentEditor({ document, setDocument, layer, tab }) {
     prevTabRef.current = tab
   }, [content?.id, tab])
 
+  useEffect(() => {
+    const element = scrollRef.current
+    if (!element) return
+
+    const updateIndicator = () => {
+      const maxScroll = element.scrollHeight - element.clientHeight
+      if (maxScroll <= 0) {
+        setScrollIndicator({ progress: 0, visible: false })
+        return
+      }
+
+      setScrollIndicator({
+        progress: element.scrollTop / maxScroll,
+        visible: true
+      })
+    }
+
+    updateIndicator()
+    element.addEventListener('scroll', updateIndicator)
+    window.addEventListener('resize', updateIndicator)
+
+    return () => {
+      element.removeEventListener('scroll', updateIndicator)
+      window.removeEventListener('resize', updateIndicator)
+    }
+  }, [content?.id, tab])
+
   if (!content) {
     return <div className="panel w-full h-full overflow-scroll relative" />
   }
@@ -45,7 +73,7 @@ function ContentEditor({ document, setDocument, layer, tab }) {
   }
 
   return (
-    <>
+    <div className="w-full h-full relative">
       <motion.div
         ref={scrollRef}
         className="panel w-full h-full overflow-scroll relative"
@@ -90,7 +118,18 @@ function ContentEditor({ document, setDocument, layer, tab }) {
           </motion.div>
         </AnimatePresence>
       </motion.div>
-    </>
+
+      {scrollIndicator.visible && (
+        <div className="pointer-events-none absolute right-1 top-6 bottom-10 w-[3px] rounded-full bg-black/0 opacity-20">
+          <div
+            className="absolute -left-1 w-2 h-48 rounded-full bg-white"
+            style={{
+              top: `calc(${scrollIndicator.progress} * (100% - 12rem))`
+            }}
+          />
+        </div>
+      )}
+    </div>
   )
 }
 
