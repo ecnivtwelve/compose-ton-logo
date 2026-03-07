@@ -158,9 +158,6 @@ function App() {
   }
 
   const [emailPopupShown, setEmailPopupShown] = useState(false)
-  const emailPopup = () => {
-    setEmailPopupShown(true)
-  }
 
   const [emailSent, setEmailSent] = useState(false)
   const [email, setEmail] = useState('')
@@ -169,6 +166,11 @@ function App() {
   const [emailInputFocus, setEmailInputFocus] = useState(false)
   const captureRef = useRef(null)
   const [mailError, setMailError] = useState(null)
+
+  const emailPopup = () => {
+    setEmailPopupShown(true)
+    setEmail('')
+  }
 
   const sendEmail = async () => {
     const mailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -191,8 +193,8 @@ function App() {
         attachment = new File([blob], 'logo.png', { type: 'image/png' })
       }
 
-      const data = await mg.messages.create('compose-ton-logo.vincelinise.com', {
-        from: 'MMI IUT de Lannion <noreply@compose-ton-logo.vincelinise.com>',
+      const data = await mg.messages.create('sae-alt.vincelinise.com', {
+        from: 'MMI IUT de Lannion <noreply@sae-alt.vincelinise.com>',
         to: [email],
         subject: 'Compose ton logo - Votre logo est prêt !',
         template: 'LogoReady',

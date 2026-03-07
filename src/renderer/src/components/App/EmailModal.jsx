@@ -1,7 +1,7 @@
 import { AtSignIcon, XIcon } from 'lucide-react'
 import { motion, AnimatePresence } from 'motion/react'
 import Button from '../Button'
-import { useRef, useState } from 'react'
+import { useRef } from 'react'
 
 function EmailModal({
   visible,
@@ -13,6 +13,12 @@ function EmailModal({
   setEmailInputFocus
 }) {
   const emailInputRef = useRef(null)
+  const handleSendMouseDown = (e) => {
+    e.preventDefault()
+    emailInputRef.current?.blur()
+    setEmailInputFocus(false)
+    onSend()
+  }
 
   return (
     <AnimatePresence>
@@ -58,7 +64,7 @@ function EmailModal({
               <Button onClick={onCancel}>
                 <p className="ts text-3xl font-semibold">Annuler</p>
               </Button>
-              <Button tint={'#0055FF'} onClick={onSend}>
+              <Button tint={'#0055FF'} onClick={() => {}} onMouseDown={handleSendMouseDown}>
                 <p className="ts text-3xl font-semibold">Recevoir un e-mail</p>
               </Button>
             </div>

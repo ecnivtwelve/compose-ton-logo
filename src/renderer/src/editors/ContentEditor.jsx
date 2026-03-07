@@ -8,6 +8,13 @@ import BackgroundEditor from './content/BackgroundEditor'
 function ContentEditor({ document, setDocument, layer, tab }) {
   const content = document[layer]
   const scrollRef = useRef(null)
+  const touchGuardRef = useRef({
+    active: false,
+    moved: false,
+    startX: 0,
+    startY: 0,
+    suppressUntil: 0
+  })
   const [scrollIndicator, setScrollIndicator] = useState({ progress: 0, visible: false })
 
   const prevTabRef = useRef(tab)
@@ -72,11 +79,56 @@ function ContentEditor({ document, setDocument, layer, tab }) {
     })
   }
 
+  const onTouchStartCapture = (event) => {
+    const touch = event.touches?.[0]
+    if (!touch) return
+
+    touchGuardRef.current.active = true
+    touchGuardRef.current.moved = false
+    touchGuardRef.current.startX = touch.clientX
+    touchGuardRef.current.startY = touch.clientY
+  }
+
+  const onTouchMoveCapture = (event) => {
+    if (!touchGuardRef.current.active) return
+    const touch = event.touches?.[0]
+    if (!touch) return
+
+    const deltaX = Math.abs(touch.clientX - touchGuardRef.current.startX)
+    const deltaY = Math.abs(touch.clientY - touchGuardRef.current.startY)
+
+    if (deltaX > 8 || deltaY > 8) {
+      touchGuardRef.current.moved = true
+      touchGuardRef.current.suppressUntil = Date.now() + 450
+    }
+  }
+
+  const onTouchEndCapture = () => {
+    touchGuardRef.current.active = false
+  }
+
+  const onTouchCancelCapture = () => {
+    touchGuardRef.current.active = false
+    touchGuardRef.current.moved = false
+  }
+
+  const onClickCapture = (event) => {
+    if (Date.now() <= touchGuardRef.current.suppressUntil) {
+      event.preventDefault()
+      event.stopPropagation()
+    }
+  }
+
   return (
     <div className="w-full h-full relative">
       <motion.div
         ref={scrollRef}
         className="panel w-full h-full overflow-scroll relative"
+        onTouchStartCapture={onTouchStartCapture}
+        onTouchMoveCapture={onTouchMoveCapture}
+        onTouchEndCapture={onTouchEndCapture}
+        onTouchCancelCapture={onTouchCancelCapture}
+        onClickCapture={onClickCapture}
         initial={{ opacity: 0, x: -200 }}
         animate={{ opacity: 1, x: 0 }}
         exit={{ opacity: 0, x: -600 }}
