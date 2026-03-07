@@ -6,3 +6,4 @@ out
 *.log*
 src/renderer/src/consts.json
 dist/web/.DS_Store
+dist/web/.DS_Store
